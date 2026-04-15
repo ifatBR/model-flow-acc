@@ -1,0 +1,9 @@
+
+# Keep environment variables out of version control
+.env
+.env.*
+node_modules/
+.DS_Store
+/model-flow-api
+npm-debug.log
+dist/
