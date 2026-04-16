@@ -7,6 +7,12 @@
     "outDir": "dist",
     "esModuleInterop": true,
     "strict": true,
-    "types": ["node"]
-  }
+    "types": ["node"],
+    "paths": {
+      "@app/types/*": ["../packages/types/*"],
+      "@modules/*": ["./src/modules/*"]
+    }
+  },
+  "include": ["src/**/*.ts", "../packages/types/roles.ts"],
+  "exclude": ["node_modules", "dist"]
 }

@@ -2,7 +2,7 @@ import { Box, FileUpload, Flex, Icon } from "@chakra-ui/react";
 import { LuUpload } from "react-icons/lu";
 import { HiUpload } from "react-icons/hi";
 import { BodyText } from "./Typography";
-import { Button } from "./button";
+import { Button } from "./Button";
 
 interface UploadFileInputProps {
   uploadFile: (file: File) => void;

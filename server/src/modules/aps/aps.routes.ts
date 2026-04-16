@@ -7,7 +7,7 @@ import {
   translateObject,
   getManifest,
   uploadUserModel,
-} from '../services/aps.service';
+} from './aps.service';
 
 //Test endpoint separately
 

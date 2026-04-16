@@ -1,7 +1,9 @@
 import { useEffect, useRef, useState } from "react";
-import { UploadMenu } from "./UploadMenu";
+import { UploadMenu } from "../../components/UploadMenu";
 import { Box } from "@chakra-ui/react";
-import { Button } from "./button";
+import { Button } from "../../components/Button";
+import { useAuth } from "@/context/AuthContext";
+import { SIDEBAR } from "@/styles/designTokens";
 
 declare global {
   interface Window {
@@ -9,9 +11,8 @@ declare global {
   }
 }
 
-type ApsViewerProps = { accessToken: string };
-
-export function ApsViewer({ accessToken }: ApsViewerProps) {
+export function ViewerPage() {
+  const { accessToken } = useAuth();
   const [urn, setUrn] = useState<string>("");
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
@@ -59,8 +60,14 @@ export function ApsViewer({ accessToken }: ApsViewerProps) {
   }, [urn]);
 
   return urn ? (
-    <Box>
-      <Box position="absolute" top="20px" left="20px" zIndex="2">
+    <Box w="100%" position="absolute">
+      <Box
+        position="absolute"
+        ml={SIDEBAR.widthCollapsed}
+        top="40px"
+        left={"40px"}
+        zIndex="2"
+      >
         <Button onClick={() => setUrn("")}>Clear model</Button>
       </Box>
       <Box ref={containerRef} w="100%" h="100vh" />

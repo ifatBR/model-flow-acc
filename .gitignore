@@ -7,3 +7,4 @@ node_modules/
 /model-flow-api
 npm-debug.log
 dist/
+docs/

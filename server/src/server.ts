@@ -1,6 +1,6 @@
 import 'dotenv/config';
 import Fastify from 'fastify';
-import { apsRoutes } from './routes/aps.routes';
+import { apsRoutes } from './modules/aps/aps.routes';
 import multipart from '@fastify/multipart';
 import cors from '@fastify/cors';
 

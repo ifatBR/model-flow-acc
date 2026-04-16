@@ -1,4 +1,4 @@
-import { AUTODESK_BASIC_URL, AUTODEKS_APIS } from '../apis/autodeskApis';
+import { AUTODESK_BASIC_URL, AUTODEKS_APIS } from '../../apis/autodeskApis';
 const BUCKET_KEY = 'ifat-test-bucket-123456';
 
 export async function getAccessToken() {

@@ -21,6 +21,7 @@ const _gray300 = "#DDDDDD";
 const _gray500 = "#9E9E9E";
 const _gray600 = "#6B6B6B";
 const _gray900 = "#1A1A1A";
+const _black = "#09090b";
 
 export const COLORS = {
   primary: {
@@ -49,7 +50,7 @@ export const COLORS = {
     7: _pink400,
   },
   bg: {
-    base: _gray50,
+    base: _black,
     surface: _white,
     elevated: _white,
   },
@@ -74,7 +75,7 @@ export const COLORS = {
     infoBg: "#F0F9FF",
   },
   sidebar: {
-    bg: _white,
+    bg: _black,
     itemActiveBg: _lime400,
     itemActiveColor: _blue900,
     itemColor: _gray600,
@@ -153,10 +154,10 @@ export const RADII = {
 } as const;
 
 export const SHADOWS = {
-  sm: "0 1px 2px rgba(0,0,0,0.06)",
-  md: "0 2px 8px rgba(0,0,0,0.08)",
-  lg: "0 4px 16px rgba(0,0,0,0.10)",
-  sidebar: "1px 0 2px rgba(0,0,0,0.06)",
+  sm: "0 1px 2px rgba(255, 255, 255, 0.06)",
+  md: "0 2px 8px rgba(255, 255, 255,0.08)",
+  lg: "0 4px 16px rgba(255, 255, 255,0.10)",
+  sidebar: "1px 0 10px rgba(255, 255, 255,0.06)",
 } as const;
 
 export const SIDEBAR = {
