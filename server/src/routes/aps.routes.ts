@@ -6,7 +6,10 @@ import {
   listObjects,
   translateObject,
   getManifest,
+  uploadUserModel,
 } from '../services/aps.service';
+
+//Test endpoint separately
 
 export async function apsRoutes(app: FastifyInstance) {
   app.get('/token', async () => {
@@ -27,7 +30,6 @@ export async function apsRoutes(app: FastifyInstance) {
     if (!file) {
       return reply.code(400).send({ error: 'No file uploaded' });
     }
-    const buffer = await file.toBuffer();
 
     const fileBuffer = await file.toBuffer();
     return uploadFile(fileBuffer, file.filename);
@@ -43,5 +45,22 @@ export async function apsRoutes(app: FastifyInstance) {
   app.post<{ Body: { urn: string } }>('/manifest', async (req) => {
     const { urn } = req.body;
     return getManifest(urn);
+  });
+
+  // Upload endpoint for viewer
+
+  app.post<{ Body: { urn: string } }>('/models/upload', async (req, reply) => {
+    const file = await req.file({
+      limits: {
+        fileSize: 100 * 1024 * 1024,
+      },
+    });
+
+    if (!file) {
+      return reply.code(400).send({ error: 'No file uploaded' });
+    }
+    const accessToken = req.headers.accessToken;
+    const fileBuffer = await file.toBuffer();
+    return uploadUserModel(fileBuffer, file.filename, accessToken);
   });
 }

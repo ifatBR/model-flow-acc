@@ -41,8 +41,17 @@ export async function createBucket() {
   return data;
 }
 
-export async function uploadFile(fileBuffer: Buffer, fileName: string) {
-  const { access_token } = await getAccessToken();
+export async function uploadFile(
+  fileBuffer: Buffer,
+  fileName: string,
+  accessToken?: string | string[] | undefined,
+) {
+  let access_token = accessToken;
+  if (!access_token) {
+    const accessTokenRes = await getAccessToken();
+    access_token = accessTokenRes.access_token;
+  }
+
   const bucketKey = BUCKET_KEY;
   const getRes = await fetch(
     `${AUTODESK_BASIC_URL}${AUTODEKS_APIS.getSignedS3Upload(bucketKey, fileName)}`,
@@ -96,8 +105,15 @@ export async function listObjects() {
   return res.json();
 }
 
-export async function translateObject(objectId: string) {
-  const { access_token } = await getAccessToken();
+export async function translateObject(
+  objectId: string,
+  accessToken?: string | string[] | undefined,
+) {
+  let access_token = accessToken;
+  if (!access_token) {
+    const accessTokenRes = await getAccessToken();
+    access_token = accessTokenRes.access_token;
+  }
 
   const urn = Buffer.from(objectId).toString('base64');
 
@@ -121,8 +137,13 @@ export async function translateObject(objectId: string) {
   return { urn };
 }
 
-export async function getManifest(urn: string) {
-  const { access_token } = await getAccessToken();
+export async function getManifest(urn: string, accessToken?: string | string[] | undefined) {
+  let access_token = accessToken;
+
+  if (!access_token) {
+    const accessTokenRes = await getAccessToken();
+    access_token = accessTokenRes.access_token;
+  }
 
   const res = await fetch(`${AUTODESK_BASIC_URL}${AUTODEKS_APIS.getManifest(urn)}`, {
     headers: {
@@ -131,4 +152,17 @@ export async function getManifest(urn: string) {
   });
 
   return res.json();
+}
+
+export async function uploadUserModel(
+  fileBuffer: Buffer,
+  fileName: string,
+  accessToken: string | string[] | undefined,
+) {
+  const fileData = await uploadFile(fileBuffer, fileName, accessToken);
+  console.log('>>>>fileData:', fileData);
+  const { objectId } = fileData;
+  const translatedFile = await translateObject(objectId, accessToken);
+  const { urn } = translatedFile;
+  return { urn };
 }
