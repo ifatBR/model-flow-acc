@@ -4,6 +4,7 @@ import { Box } from "@chakra-ui/react";
 import { Button } from "../../components/Button";
 import { useAuth } from "@/context/AuthContext";
 import { SIDEBAR } from "@/styles/designTokens";
+import { useLayout } from "@/context/LayoutContext";
 
 declare global {
   interface Window {
@@ -13,6 +14,8 @@ declare global {
 
 export function ViewerPage() {
   const { accessToken } = useAuth();
+  const { isCollapsed } = useLayout();
+
   const [urn, setUrn] = useState<string>("");
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
@@ -60,17 +63,23 @@ export function ViewerPage() {
   }, [urn]);
 
   return urn ? (
-    <Box w="100%" position="absolute">
+    <Box
+      w={`calc(100%-${isCollapsed ? SIDEBAR.widthCollapsed : SIDEBAR.widthExpanded}`}
+      position="absolute"
+    >
       <Box
         position="absolute"
         ml={SIDEBAR.widthCollapsed}
         top="40px"
-        left={"40px"}
         zIndex="2"
       >
         <Button onClick={() => setUrn("")}>Clear model</Button>
       </Box>
-      <Box ref={containerRef} w="100%" h="100vh" />
+      <Box
+        ref={containerRef}
+        w={`calc(100%-${isCollapsed ? SIDEBAR.widthCollapsed : SIDEBAR.widthExpanded}`}
+        h="100vh"
+      />
     </Box>
   ) : (
     <UploadMenu

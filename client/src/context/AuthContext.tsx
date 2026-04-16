@@ -19,6 +19,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     init();
   }, []);
+
   return (
     <AuthContext.Provider value={{ accessToken, setAccessToken }}>
       {children}

@@ -4,12 +4,17 @@ import { AppLayout } from "../components/AppLayout";
 import { ViewerPage } from "@/pages/viewer/ViewerPage";
 import { LandingPage } from "@/pages/landing/LandingPage";
 import { BrowserPage } from "@/pages/browser/BrowserPage";
+import { LayoutProvider } from "@/context/LayoutContext";
 
 const routerConfig = [
   { path: ROUTES.LANDING, element: <LandingPage /> },
   {
     path: "/",
-    element: <AppLayout />,
+    element: (
+      <LayoutProvider>
+        <AppLayout />
+      </LayoutProvider>
+    ),
     children: [
       { index: true, element: <Navigate to={ROUTES.LANDING} replace /> },
       { path: ROUTES.VIEWER, element: <ViewerPage /> },

@@ -1,18 +1,18 @@
-import { useState } from "react";
 import { Outlet } from "react-router-dom";
 import { Box } from "@chakra-ui/react";
 import { Sidebar } from "./Sidebar";
 import { SIDEBAR, SPACING } from "@/styles/designTokens";
+import { useLayout } from "@/context/LayoutContext";
 
 export function AppLayout() {
-  const [isCollapsed, setIsCollapsed] = useState(true);
-
+  const { isCollapsed, setIsCollapsed } = useLayout();
   return (
     <>
       <Sidebar
         isCollapsed={isCollapsed}
-        onToggle={() => setIsCollapsed((v) => !v)}
+        onToggle={() => setIsCollapsed(!isCollapsed)}
       />
+
       <Box
         as="main"
         ml={isCollapsed ? SIDEBAR.widthCollapsed : SIDEBAR.widthExpanded}
