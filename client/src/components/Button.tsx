@@ -10,7 +10,7 @@ import {
 import { Tooltip } from "@/components/ui/tooltip";
 
 interface ButtonProps extends Omit<ChakraButtonProps, "variant"> {
-  variant?: "primary" | "secondary" | "danger" | "ghost";
+  variant?: "primary" | "secondary" | "danger" | "ghost" | "reversed";
   isLoading?: boolean;
   tooltip?: string;
 }
@@ -36,6 +36,10 @@ const variantStyles: Record<
     backgroundColor: "transparent",
     color: COLORS.text.secondary,
   },
+  reversed: {
+    backgroundColor: COLORS.btn.reversed.bg,
+    color: COLORS.btn.reversed.color,
+  },
 };
 
 const variantHoverStyles: Record<
@@ -46,6 +50,7 @@ const variantHoverStyles: Record<
   secondary: COLORS.btn.secondary.hoverBg,
   danger: COLORS.btn.danger.hoverBg,
   ghost: COLORS.bg.elevated,
+  reversed: COLORS.btn.reversed.hoverBg,
 };
 
 export function Button({

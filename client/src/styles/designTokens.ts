@@ -91,6 +91,7 @@ export const COLORS = {
     },
     danger: { bg: _red400, color: _white, hoverBg: _red300 },
     disabled: { bg: _gray200, color: _gray500 },
+    reversed: { bg: _white, color: _gray900, hoverBg: _blue100 },
   },
   input: {
     bg: _white,
