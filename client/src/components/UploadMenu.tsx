@@ -1,7 +1,8 @@
 import { AbsoluteCenter, Box, Flex, Spinner } from "@chakra-ui/react";
 import { UploadFileInput } from "./UploadFileInput";
 import { COLORS, RADII, SHADOWS, SPACING } from "@/styles/designTokens";
-import { FileTypes } from "@/constants/filerTypes";
+import { FileTypes } from "@/constants/fileTypes";
+import { uploadModel } from "@/api/model";
 
 interface UploadMenuProps {
   accessToken: string | null;
@@ -25,13 +26,8 @@ export function UploadMenu({
     const formData = new FormData();
     formData.append("file", file);
 
-    const res = await fetch("http://localhost:3000/api/aps/models/upload", {
-      method: "POST",
-      headers: { accessToken: accessToken },
-      body: formData,
-    });
+    const resData = await uploadModel(formData, accessToken);
 
-    const resData = await res.json();
     const { urn } = resData;
     setUrn(urn);
   };

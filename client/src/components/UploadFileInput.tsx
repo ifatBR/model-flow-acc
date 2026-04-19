@@ -4,7 +4,7 @@ import { HiUpload } from "react-icons/hi";
 import { BodyText, ErrorText } from "./Typography";
 import { Button } from "./Button";
 import { useState } from "react";
-import type { FileType } from "@/constants/filerTypes";
+import type { FileType } from "@/constants/fileTypes";
 
 interface UploadFileInputProps {
   uploadFile: (file: File) => void;

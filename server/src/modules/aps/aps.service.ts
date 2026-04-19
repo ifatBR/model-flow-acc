@@ -23,7 +23,7 @@ export async function getAccessToken() {
 
 export async function createBucket() {
   const { access_token } = await getAccessToken();
-  const res = await fetch(`${AUTODESK_BASIC_URL}${AUTODEKS_APIS.createBucket}`, {
+  const res = await fetch(`${AUTODESK_BASIC_URL}${AUTODEKS_APIS.OSS.createBucket}`, {
     method: 'POST',
     headers: {
       Authorization: `Bearer ${access_token}`,
@@ -54,7 +54,7 @@ export async function uploadFile(
 
   const bucketKey = BUCKET_KEY;
   const getRes = await fetch(
-    `${AUTODESK_BASIC_URL}${AUTODEKS_APIS.getSignedS3Upload(bucketKey, fileName)}`,
+    `${AUTODESK_BASIC_URL}${AUTODEKS_APIS.OSS.getSignedS3Upload(bucketKey, fileName)}`,
     {
       method: 'GET',
       headers: {
@@ -77,7 +77,7 @@ export async function uploadFile(
   }
 
   const res = await fetch(
-    `${AUTODESK_BASIC_URL}${AUTODEKS_APIS.getSignedS3Upload(bucketKey, fileName)}`,
+    `${AUTODESK_BASIC_URL}${AUTODEKS_APIS.OSS.getSignedS3Upload(bucketKey, fileName)}`,
     {
       method: 'POST',
       headers: {
@@ -96,73 +96,11 @@ export async function listObjects() {
   const { access_token } = await getAccessToken();
   const bucketKey = BUCKET_KEY;
 
-  const res = await fetch(`${AUTODESK_BASIC_URL}${AUTODEKS_APIS.listObjects(bucketKey)}`, {
+  const res = await fetch(`${AUTODESK_BASIC_URL}${AUTODEKS_APIS.OSS.listObjects(bucketKey)}`, {
     headers: {
       Authorization: `Bearer ${access_token}`,
     },
   });
 
   return res.json();
-}
-
-export async function translateObject(
-  objectId: string,
-  accessToken?: string | string[] | undefined,
-) {
-  let access_token = accessToken;
-  if (!access_token) {
-    const accessTokenRes = await getAccessToken();
-    access_token = accessTokenRes.access_token;
-  }
-
-  const urn = Buffer.from(objectId).toString('base64');
-
-  const res = await fetch(`${AUTODESK_BASIC_URL}${AUTODEKS_APIS.translateObject}`, {
-    method: 'POST',
-    headers: {
-      Authorization: `Bearer ${access_token}`,
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({
-      input: { urn },
-      output: {
-        formats: [{ type: 'svf', views: ['2d', '3d'] }],
-      },
-    }),
-  });
-
-  const data = await res.json();
-  console.log('translate:', data);
-
-  return { urn };
-}
-
-export async function getManifest(urn: string, accessToken?: string | string[] | undefined) {
-  let access_token = accessToken;
-
-  if (!access_token) {
-    const accessTokenRes = await getAccessToken();
-    access_token = accessTokenRes.access_token;
-  }
-
-  const res = await fetch(`${AUTODESK_BASIC_URL}${AUTODEKS_APIS.getManifest(urn)}`, {
-    headers: {
-      Authorization: `Bearer ${access_token}`,
-    },
-  });
-
-  return res.json();
-}
-
-export async function uploadUserModel(
-  fileBuffer: Buffer,
-  fileName: string,
-  accessToken: string | string[] | undefined,
-) {
-  const fileData = await uploadFile(fileBuffer, fileName, accessToken);
-  console.log('>>>>fileData:', fileData);
-  const { objectId } = fileData;
-  const translatedFile = await translateObject(objectId, accessToken);
-  const { urn } = translatedFile;
-  return { urn };
 }
