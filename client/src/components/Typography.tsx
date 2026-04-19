@@ -69,3 +69,19 @@ export function Caption({ children }: ChildrenProps) {
     </Text>
   );
 }
+
+interface ErorTextProps extends ChildrenProps {
+  bold?: boolean;
+}
+export function ErrorText({ children, bold }: ErorTextProps) {
+  return (
+    <Text
+      as="span"
+      fontSize={FONT_SIZES.sm}
+      fontWeight={bold ? FONT_WEIGHTS.bold : FONT_WEIGHTS.regular}
+      color={COLORS.semantic.error}
+    >
+      {children}
+    </Text>
+  );
+}

@@ -1,6 +1,7 @@
 import { AbsoluteCenter, Box, Flex, Spinner } from "@chakra-ui/react";
 import { UploadFileInput } from "./UploadFileInput";
-import { COLORS } from "@/styles/designTokens";
+import { COLORS, RADII, SHADOWS, SPACING } from "@/styles/designTokens";
+import { FileTypes } from "@/constants/filerTypes";
 
 interface UploadMenuProps {
   accessToken: string | null;
@@ -40,18 +41,21 @@ export function UploadMenu({
       {isLoading ? (
         <Flex direction="column" align="center">
           <Spinner size="lg" />
-          <Box color="white" mt="40px">
+          <Box color={COLORS.text.inverse} mt="40px">
             Loading...
           </Box>
         </Flex>
       ) : (
         <Box
-          bg="white"
-          boxShadow="lightGrey 3px 3px 15px"
-          borderRadius="8px"
-          p="15px 20px"
+          bg={COLORS.bg.surface}
+          boxShadow={SHADOWS.popup}
+          borderRadius={RADII.md}
+          p={`${SPACING[4]} ${SPACING[5]}`}
         >
-          <UploadFileInput uploadFile={uploadFile} />
+          <UploadFileInput
+            uploadFile={uploadFile}
+            fileTypes={[FileTypes.RVT, FileTypes.IFC]}
+          />
         </Box>
       )}
     </AbsoluteCenter>

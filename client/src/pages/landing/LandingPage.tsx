@@ -18,14 +18,14 @@ export function LandingPage() {
         gap="20px"
         bg={COLORS.bg.surface}
         borderRadius={RADII.xl}
-        boxShadow={SHADOWS.md}
+        boxShadow={SHADOWS.popup}
         p={SPACING[8]}
         w="100%"
         maxW="400px"
       >
         <SectionTitle>Welcome!</SectionTitle>
         <BodyText align="center">
-          This is a demo app to present my skills with the ACC API
+          This is a demo app where I played with the ACC API
         </BodyText>
         <Button variant="primary" width="100%" onClick={onStart}>
           Check it out

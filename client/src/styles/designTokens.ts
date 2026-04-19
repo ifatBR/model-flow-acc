@@ -156,9 +156,10 @@ export const RADII = {
 
 export const SHADOWS = {
   sm: "0 1px 2px rgba(255, 255, 255, 0.06)",
-  md: "0 2px 8px rgba(255, 255, 255,0.08)",
+  md: "0 2px 8px rgba(255, 255, 255,1)",
   lg: "0 4px 16px rgba(255, 255, 255,0.10)",
   sidebar: "1px 0 10px rgba(255, 255, 255,0.06)",
+  popup: "0 3px 15px rgba(211, 211, 211)",
 } as const;
 
 export const SIDEBAR = {

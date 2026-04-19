@@ -1,20 +1,36 @@
 import { Box, FileUpload, Flex, Icon } from "@chakra-ui/react";
 import { LuUpload } from "react-icons/lu";
 import { HiUpload } from "react-icons/hi";
-import { BodyText } from "./Typography";
+import { BodyText, ErrorText } from "./Typography";
 import { Button } from "./Button";
+import { useState } from "react";
+import type { FileType } from "@/constants/filerTypes";
 
 interface UploadFileInputProps {
   uploadFile: (file: File) => void;
+  fileTypes: FileType[];
 }
 
-export function UploadFileInput({ uploadFile }: UploadFileInputProps) {
+export function UploadFileInput({
+  uploadFile,
+  fileTypes,
+}: UploadFileInputProps) {
+  const [showError, setShowError] = useState(false);
+
   const onChange = async (details: {
     acceptedFiles: File[];
     rejectedFiles: FileUpload.FileRejection[];
   }) => {
+    setShowError(false);
     const file = details.acceptedFiles?.[0];
     if (!file) return;
+
+    const ext = "." + file.name.split(".").pop()?.toLowerCase();
+
+    if (!fileTypes.includes(ext as FileType)) {
+      setShowError(true);
+      return;
+    }
     uploadFile(file);
   };
 
@@ -40,8 +56,24 @@ export function UploadFileInput({ uploadFile }: UploadFileInputProps) {
           <LuUpload />
         </Icon>
         <FileUpload.DropzoneContent>
-          <Box>Drag and drop files here</Box>
-          <Box color="fg.muted">.rvt</Box>
+          {showError ? (
+            <>
+              <Box>
+                <ErrorText bold> Wrong file type</ErrorText>
+              </Box>
+              <Box>
+                <ErrorText>{`Viewer accepts types:`}</ErrorText>
+              </Box>
+              <Box>
+                <ErrorText>{`${fileTypes.join("  ")}`}</ErrorText>
+              </Box>
+            </>
+          ) : (
+            <>
+              <Box>Drag and drop files here</Box>
+              <Box color="fg.muted">{fileTypes.join("  ")}</Box>
+            </>
+          )}
         </FileUpload.DropzoneContent>
       </FileUpload.Dropzone>
       <FileUpload.List />
