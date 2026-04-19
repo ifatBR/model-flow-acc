@@ -11,4 +11,14 @@ export const AUTODEKS_APIS = {
     translateObject: 'modelderivative/v2/designdata/job',
     getManifest: (urn: string) => `modelderivative/v2/designdata/${urn}/manifest`,
   },
+  HUBS: {
+    getHubs: 'project/v1/hubs',
+    getHubById: (id: string) => `project/v1/hubs/${id}/projects`,
+    getProjectFolders: (hubId: string, projectId: string) =>
+      `project/v1/hubs/${hubId}/projects/${projectId}/topFolders`,
+  },
+  PROJECTS: {
+    getFolderContent: (projectId: string, folderId: string) =>
+      `data/v1/projects/${projectId}/folders/${folderId}/contents`,
+  },
 };
