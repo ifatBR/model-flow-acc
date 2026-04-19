@@ -28,7 +28,6 @@ export async function translateObject(
   });
 
   const data = await res.json();
-  console.log('translate:', data);
 
   return { urn };
 }

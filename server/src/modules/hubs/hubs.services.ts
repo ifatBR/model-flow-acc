@@ -1,5 +1,6 @@
 import { getAccessToken } from '@modules/aps/aps.service';
 import { AUTODEKS_APIS, AUTODESK_BASIC_URL } from '../../apis/autodeskApis';
+import { formatHubListData, formatHubData, formatFolderlistsData } from './hubs.domain';
 
 export async function getHubs(accessToken?: string | string[] | undefined) {
   let access_token = accessToken;
@@ -11,8 +12,8 @@ export async function getHubs(accessToken?: string | string[] | undefined) {
   const res = fetch(`${AUTODESK_BASIC_URL}${AUTODEKS_APIS.HUBS.getHubs}`, {
     headers: { Authorization: `Bearer ${access_token}`, region: 'EMEA' },
   });
-
-  return (await res).json();
+  const { data } = await (await res).json();
+  return formatHubListData(data);
 }
 
 export async function getHubById(id: string, accessToken?: string | string[] | undefined) {
@@ -26,7 +27,9 @@ export async function getHubById(id: string, accessToken?: string | string[] | u
     headers: { Authorization: `Bearer ${access_token}` },
   });
 
-  return (await res).json();
+  const { data } = await (await res).json();
+
+  return formatHubData(data);
 }
 
 export async function getProjectFolders(
@@ -45,5 +48,6 @@ export async function getProjectFolders(
     { headers: { Authorization: `Bearer ${access_token}` } },
   );
 
-  return (await res).json();
+  const { data } = await (await res).json();
+  return formatFolderlistsData(data);
 }

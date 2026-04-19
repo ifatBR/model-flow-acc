@@ -1,5 +1,6 @@
 import { getAccessToken } from '@modules/aps/aps.service';
 import { AUTODEKS_APIS, AUTODESK_BASIC_URL } from '../../apis/autodeskApis';
+import { formatFolderContents } from '@modules/hubs/hubs.domain';
 
 export async function getFolderContent(
   projectId: string,
@@ -18,5 +19,6 @@ export async function getFolderContent(
     },
   );
 
-  return (await res).json();
+  const { data } = await (await res).json();
+  return formatFolderContents(data);
 }
