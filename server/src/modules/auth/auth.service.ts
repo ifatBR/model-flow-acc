@@ -1,5 +1,4 @@
 import { AUTODESK_BASIC_URL, AUTODEKS_APIS } from '../../apis/autodeskApis';
-const BUCKET_KEY = 'ifat-test-bucket-123456';
 let apsToken: { value: string; expiresAt: number } | null = null;
 let tokenPromise: Promise<string> | null = null;
 

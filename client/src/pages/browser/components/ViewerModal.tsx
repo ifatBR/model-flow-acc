@@ -4,10 +4,11 @@ import { CloseButton, Dialog, Portal } from "@chakra-ui/react";
 import { useState } from "react";
 
 interface ViewerModalProps {
+  fileName: string | null;
   browseUrn: string | null;
   setUrn: (value: string | null) => void;
 }
-export function ViewerModal({ browseUrn, setUrn }: ViewerModalProps) {
+export function ViewerModal({ fileName, browseUrn, setUrn }: ViewerModalProps) {
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
   return isLoading ? (
@@ -26,7 +27,7 @@ export function ViewerModal({ browseUrn, setUrn }: ViewerModalProps) {
         <Dialog.Positioner>
           <Dialog.Content h="80vh" maxW="80vw">
             <Dialog.Header>
-              <Dialog.Title>file.txt</Dialog.Title>
+              <Dialog.Title>{fileName}</Dialog.Title>
               <Dialog.CloseTrigger asChild>
                 <CloseButton size="sm" />
               </Dialog.CloseTrigger>

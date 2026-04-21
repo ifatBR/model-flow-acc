@@ -10,11 +10,12 @@ export async function translateObject(objectId: string) {
     .replace(/\//g, '_')
     .replace(/=+$/g, '');
 
-  const res = await fetch(`${AUTODESK_BASIC_URL}${AUTODEKS_APIS.DERIVIATIVE.translateObject}`, {
+  await fetch(`${AUTODESK_BASIC_URL}${AUTODEKS_APIS.DERIVIATIVE.translateObject}`, {
     method: 'POST',
     headers: {
       Authorization: `Bearer ${accessToken}`,
       'Content-Type': 'application/json',
+      region: 'EMEA',
     },
     body: JSON.stringify({
       input: { urn },
@@ -23,8 +24,6 @@ export async function translateObject(objectId: string) {
       },
     }),
   });
-
-  const data = await res.json();
 
   return { urn };
 }

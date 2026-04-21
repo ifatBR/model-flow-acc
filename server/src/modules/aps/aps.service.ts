@@ -32,6 +32,7 @@ export async function uploadFile(fileBuffer: Buffer, fileName: string) {
       headers: {
         Authorization: `Bearer ${accessToken}`,
         'Content-Type': 'application/json',
+        region: 'EMEA',
       },
     },
   );
@@ -55,6 +56,7 @@ export async function uploadFile(fileBuffer: Buffer, fileName: string) {
       headers: {
         Authorization: `Bearer ${accessToken}`,
         'Content-Type': 'application/json',
+        region: 'EMEA',
       },
       body: JSON.stringify({ uploadKey }),
     },

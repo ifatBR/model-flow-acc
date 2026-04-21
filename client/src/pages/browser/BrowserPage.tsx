@@ -101,15 +101,17 @@ export function BrowserPage() {
   });
 
   const [urn, setUrn] = useState<string | null>(null);
+  const [previewFileName, setPreviewFileName] = useState<string | null>(null);
   const [collection, setCollection] =
     useState<TreeCollection<BrowserNode>>(EMPTY_COLLECTION);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const hubsInitialized = useRef(false);
 
-  const viewItem = async (itemId: string, projectId: any) => {
+  const viewItem = async (itemName: string, itemId: string, projectId: any) => {
     const itemVersions = await getItemVersions(projectId, itemId);
     const viewUrn = itemVersions[0]?.id;
     const encodedUrn = Buffer.from(viewUrn).toString("base64");
+    setPreviewFileName(itemName);
     setUrn(encodedUrn);
   };
 
@@ -249,7 +251,7 @@ export function BrowserPage() {
               return (
                 <TreeView.Item
                   onClick={() => {
-                    viewItem(node.value, node.projectId);
+                    viewItem(node.label, node.value, node.projectId);
                   }}
                 >
                   <NodeIcon type={node.nodeType} />
@@ -260,7 +262,7 @@ export function BrowserPage() {
           />
         </TreeView.Tree>
       </TreeView.Root>
-      <ViewerModal browseUrn={urn} setUrn={setUrn} />
+      <ViewerModal fileName={previewFileName} browseUrn={urn} setUrn={setUrn} />
     </Box>
   );
 }

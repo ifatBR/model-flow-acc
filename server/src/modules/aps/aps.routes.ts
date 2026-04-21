@@ -1,5 +1,5 @@
 import { FastifyInstance } from 'fastify';
-import { getApsToken, createBucket, uploadFile, listObjects } from './aps.service';
+import { createBucket, uploadFile, listObjects } from './aps.service';
 
 //Test endpoint separately
 
