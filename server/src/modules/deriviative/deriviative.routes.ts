@@ -24,8 +24,8 @@ export async function deriviativeRoutes(app: FastifyInstance) {
     if (!file) {
       return reply.code(400).send({ error: 'No file uploaded' });
     }
-    const { accessToken } = req.headers;
+
     const fileBuffer = await file.toBuffer();
-    return uploadUserModel(fileBuffer, file.filename, accessToken);
+    return uploadUserModel(fileBuffer, file.filename);
   });
 }

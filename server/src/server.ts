@@ -7,7 +7,7 @@ import apiRoutes from './routes/api';
 const app = Fastify({ logger: true, routerOptions: { ignoreTrailingSlash: true } });
 
 app.register(multipart);
-app.register(cors, { origin: 'http://localhost:5174' });
+app.register(cors, { origin: ['http://localhost:5173', 'http://localhost:5174'] });
 app.register(apiRoutes, { prefix: '/api' });
 app.listen({ port: 3000 }, function (err, address) {
   if (err) {

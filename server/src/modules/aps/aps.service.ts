@@ -1,32 +1,13 @@
+import { getApsToken } from '@modules/auth/auth.service';
 import { AUTODESK_BASIC_URL, AUTODEKS_APIS } from '../../apis/autodeskApis';
 const BUCKET_KEY = 'ifat-test-bucket-123456';
 
-export async function getAccessToken() {
-  const basic = Buffer.from(
-    `${process.env.APS_CLIENT_ID}:${process.env.APS_CLIENT_SECRET}`,
-  ).toString('base64');
-
-  const res = await fetch(`${AUTODESK_BASIC_URL}${AUTODEKS_APIS.getToken}`, {
-    method: 'POST',
-    headers: {
-      Authorization: `Basic ${basic}`,
-      'Content-Type': 'application/x-www-form-urlencoded',
-    },
-    body: new URLSearchParams({
-      grant_type: 'client_credentials',
-      scope: 'data:read data:write data:create bucket:create bucket:read',
-    }),
-  });
-
-  return res.json();
-}
-
 export async function createBucket() {
-  const { access_token } = await getAccessToken();
+  const accessToken = await getApsToken();
   const res = await fetch(`${AUTODESK_BASIC_URL}${AUTODEKS_APIS.OSS.createBucket}`, {
     method: 'POST',
     headers: {
-      Authorization: `Bearer ${access_token}`,
+      Authorization: `Bearer ${accessToken}`,
       'Content-Type': 'application/json',
       region: 'EMEA',
     },
@@ -41,24 +22,15 @@ export async function createBucket() {
   return data;
 }
 
-export async function uploadFile(
-  fileBuffer: Buffer,
-  fileName: string,
-  accessToken?: string | string[] | undefined,
-) {
-  let access_token = accessToken;
-  if (!access_token) {
-    const accessTokenRes = await getAccessToken();
-    access_token = accessTokenRes.access_token;
-  }
-
+export async function uploadFile(fileBuffer: Buffer, fileName: string) {
+  const accessToken = await getApsToken();
   const bucketKey = BUCKET_KEY;
   const getRes = await fetch(
     `${AUTODESK_BASIC_URL}${AUTODEKS_APIS.OSS.getSignedS3Upload(bucketKey, fileName)}`,
     {
       method: 'GET',
       headers: {
-        Authorization: `Bearer ${access_token}`,
+        Authorization: `Bearer ${accessToken}`,
         'Content-Type': 'application/json',
       },
     },
@@ -81,7 +53,7 @@ export async function uploadFile(
     {
       method: 'POST',
       headers: {
-        Authorization: `Bearer ${access_token}`,
+        Authorization: `Bearer ${accessToken}`,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({ uploadKey }),
@@ -93,12 +65,13 @@ export async function uploadFile(
 }
 
 export async function listObjects() {
-  const { access_token } = await getAccessToken();
+  const accessToken = await getApsToken();
+
   const bucketKey = BUCKET_KEY;
 
   const res = await fetch(`${AUTODESK_BASIC_URL}${AUTODEKS_APIS.OSS.listObjects(bucketKey)}`, {
     headers: {
-      Authorization: `Bearer ${access_token}`,
+      Authorization: `Bearer ${accessToken}`,
     },
   });
 

@@ -1,46 +1,18 @@
-import { AbsoluteCenter, Box, Flex, Spinner } from "@chakra-ui/react";
+import { AbsoluteCenter, Box } from "@chakra-ui/react";
 import { UploadFileInput } from "./UploadFileInput";
 import { COLORS, RADII, SHADOWS, SPACING } from "@/styles/designTokens";
 import { FileTypes } from "@/constants/fileTypes";
-import { uploadModel } from "@/api/model";
+import { Loader } from "./Loader";
 
 interface UploadMenuProps {
-  accessToken: string | null;
   isLoading: boolean;
-  setUrn: (value: string) => void;
-  setIsLoading: (value: boolean) => void;
+  uploadFile: (file: File) => void;
 }
-export function UploadMenu({
-  accessToken,
-  isLoading,
-  setUrn,
-  setIsLoading,
-}: UploadMenuProps) {
-  const uploadFile = async (file: File) => {
-    if (!accessToken) {
-      throw new Error("No access token");
-    }
-
-    setIsLoading(true);
-
-    const formData = new FormData();
-    formData.append("file", file);
-
-    const resData = await uploadModel(formData, accessToken);
-
-    const { urn } = resData;
-    setUrn(urn);
-  };
-
+export function UploadMenu({ isLoading, uploadFile }: UploadMenuProps) {
   return (
     <AbsoluteCenter h="100vh" bg={COLORS.bg.base}>
       {isLoading ? (
-        <Flex direction="column" align="center">
-          <Spinner size="lg" />
-          <Box color={COLORS.text.inverse} mt="40px">
-            Loading...
-          </Box>
-        </Flex>
+        <Loader />
       ) : (
         <Box
           bg={COLORS.bg.surface}

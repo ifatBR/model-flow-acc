@@ -26,7 +26,7 @@ export const formatFolderlistsData = (rawData: any) => {
 };
 
 export const formatFolderContents = (rawData: any) => {
-  const allowedTypes = ['folder', 'items'];
+  const allowedTypes = ['folders', 'items'];
   return rawData
     .filter(({ type }: { type: string }) => allowedTypes.includes(type))
     .map(({ type, id, attributes }: { type: string; id: string; attributes: any }) => ({

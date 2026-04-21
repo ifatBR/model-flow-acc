@@ -3,11 +3,11 @@ import { useLocation } from "react-router-dom";
 import { Tooltip } from "./ui/tooltip";
 
 import {
-  View,
   FolderTree,
   ChevronLeft,
   ChevronRight,
   LogOut,
+  Binoculars,
 } from "lucide-react";
 import {
   COLORS,
@@ -34,7 +34,7 @@ interface NavItemDef {
 
 const NAV_ITEMS: NavItemDef[] = [
   { label: "Browser", to: ROUTES.BROWSER, Icon: FolderTree },
-  { label: "Viewer", to: ROUTES.VIEWER, Icon: View },
+  { label: "Viewer", to: ROUTES.VIEWER, Icon: Binoculars },
 ];
 
 export function Sidebar({ isCollapsed, onToggle }: SidebarProps) {

@@ -1,13 +1,12 @@
-import { useEffect, useRef, useState } from "react";
+import { useState } from "react";
 import { UploadMenu } from "../../components/UploadMenu";
 import { Box } from "@chakra-ui/react";
 import { Button } from "../../components/Button";
-import { useAuth } from "@/context/AuthContext";
 import { SIDEBAR } from "@/styles/designTokens";
 import { useLayout } from "@/context/LayoutContext";
-import { setupViewerToolbar } from "@/utils/viewer.utils";
+import { uploadModel } from "@/api/model";
+import { ApsViewer } from "@/components/ApsViewer";
 import "@/styles/css/ViewerButton.scss";
-import Fish from "@/components/Fish";
 
 declare global {
   interface Window {
@@ -16,71 +15,23 @@ declare global {
 }
 
 export function ViewerPage() {
-  const { accessToken } = useAuth();
   const { isCollapsed } = useLayout();
   const [urn, setUrn] = useState<string>("");
   const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [showFish, setShowFish] = useState<boolean>(false);
 
-  const containerRef = useRef<HTMLDivElement | null>(null);
-  const viewerRef = useRef<any>(null);
-  const toolbarCleanupRef = useRef<(() => void) | null>(null);
+  const uploadFile = async (file: File) => {
+    setIsLoading(true);
 
-  const onClickBtn = () => {
-    setShowFish(true);
+    const formData = new FormData();
+    formData.append("file", file);
+
+    const resData = await uploadModel(formData);
+    const { urn } = resData;
+    setUrn(urn);
   };
-  useEffect(() => {
-    let cancelled = false;
-    async function initViewer() {
-      if (!containerRef.current || !window.Autodesk) return;
-
-      if (cancelled) return;
-
-      window.Autodesk.Viewing.Initializer({ accessToken: accessToken }, () => {
-        if (!containerRef.current || cancelled) return;
-        const viewer = new window.Autodesk.Viewing.GuiViewer3D(
-          containerRef.current,
-        );
-
-        viewerRef.current = viewer;
-        if (!viewer) return;
-        viewer.start();
-
-        toolbarCleanupRef.current = setupViewerToolbar(viewer, onClickBtn);
-
-        setIsLoading(false);
-        window.Autodesk.Viewing.Document.load(
-          `urn:${urn}`,
-          (doc: any) => {
-            const defaultModel = doc.getRoot().getDefaultGeometry();
-            viewer.loadDocumentNode(doc, defaultModel);
-          },
-          (errCode: number, errMsg: string) => {
-            console.error("Viewer load error:", errCode, errMsg);
-          },
-        );
-      });
-    }
-
-    initViewer();
-
-    return () => {
-      cancelled = true;
-      if (toolbarCleanupRef.current) {
-        toolbarCleanupRef.current();
-        toolbarCleanupRef.current = null;
-      }
-
-      if (viewerRef.current) {
-        viewerRef.current.finish();
-        viewerRef.current = null;
-      }
-    };
-  }, [urn]);
 
   return urn ? (
     <Box
-      id="viewerPAge"
       w={`calc(100% - ${isCollapsed ? SIDEBAR.widthCollapsed : SIDEBAR.widthExpanded})`}
       h="100vh"
       position="absolute"
@@ -95,19 +46,9 @@ export function ViewerPage() {
       >
         <Button onClick={() => setUrn("")}>Clear model</Button>
       </Box>
-      <Box ref={containerRef} position="absolute" w="100%" h="100vh" />
-      {showFish && (
-        <Box position="absolute" zIndex="2" bottom="70px" ml="30%" w={"40%"}>
-          <Fish setPlay={setShowFish} />
-        </Box>
-      )}
+      <ApsViewer urn={urn} setIsLoading={setIsLoading} />
     </Box>
   ) : (
-    <UploadMenu
-      accessToken={accessToken}
-      setUrn={setUrn}
-      setIsLoading={setIsLoading}
-      isLoading={isLoading}
-    />
+    <UploadMenu isLoading={isLoading} uploadFile={uploadFile} />
   );
 }

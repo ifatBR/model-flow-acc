@@ -20,5 +20,7 @@ export const AUTODEKS_APIS = {
   PROJECTS: {
     getFolderContent: (projectId: string, folderId: string) =>
       `data/v1/projects/${projectId}/folders/${folderId}/contents`,
+    getItemVersions: (projectId: string, itemId: string) =>
+      `data/v1/projects/${projectId}/items/${itemId}/versions`,
   },
 };

@@ -1,13 +1,9 @@
 import { FastifyInstance } from 'fastify';
-import { getAccessToken, createBucket, uploadFile, listObjects } from './aps.service';
+import { getApsToken, createBucket, uploadFile, listObjects } from './aps.service';
 
 //Test endpoint separately
 
 export async function apsRoutes(app: FastifyInstance) {
-  app.get('/token', async () => {
-    return getAccessToken();
-  });
-
   app.post('/createBucket', async () => {
     return createBucket();
   });
