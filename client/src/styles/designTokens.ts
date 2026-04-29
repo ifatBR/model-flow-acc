@@ -7,9 +7,11 @@ const _teal100 = "#E0F7F4";
 const _lime600 = "#48C96D";
 const _lime400 = "#AEE553";
 const _lime200 = "#cff690";
+const _green400 = "#41d03f";
 const _red400 = "#FF6B6B";
 const _red300 = "#ff5252";
 const _yellow400 = "#FFD93D";
+const _orange400 = "#ec9c33";
 const _purple400 = "#C77DFF";
 const _cyan400 = "#4FC3F7";
 const _pink400 = "#F48FB1";
@@ -20,6 +22,7 @@ const _gray200 = "#EEEEEE";
 const _gray300 = "#DDDDDD";
 const _gray500 = "#9E9E9E";
 const _gray600 = "#6B6B6B";
+const _gray800 = "#2f2f2f";
 const _gray900 = "#1A1A1A";
 const _black = "#09090b";
 
@@ -38,7 +41,7 @@ export const COLORS = {
     dark: _lime600,
     default: _lime400,
     secondary: _lime200,
-    tertiary: _gray200,
+    tertiary: _gray800,
   },
   palette: {
     1: _teal400,
@@ -51,28 +54,29 @@ export const COLORS = {
   },
   bg: {
     base: _black,
-    surface: _white,
-    elevated: _white,
-  },
-  text: {
-    primary: _gray900,
-    secondary: _gray600,
-    tertiary: _gray500,
+    surface: _gray900,
+    elevated: _gray800,
     inverse: _white,
   },
+  text: {
+    primary: _white,
+    secondary: _gray100,
+    tertiary: _gray300,
+    inverse: _gray900,
+  },
   border: {
-    default: _gray200,
-    strong: _gray300,
+    default: _gray100,
+    strong: _gray50,
   },
   semantic: {
     error: _red400,
-    warning: _yellow400,
+    warning: _orange400,
     success: _lime600,
     info: _cyan400,
-    errorBg: "#FFF0F0",
-    warningBg: "#FFFBEB",
-    successBg: "#F0FFF4",
-    infoBg: "#F0F9FF",
+    errorBg: "#421313",
+    warningBg: "#2e2613",
+    successBg: "#113119",
+    infoBg: "#0c1d28",
   },
   sidebar: {
     bg: _black,
@@ -100,6 +104,11 @@ export const COLORS = {
     borderError: _red400,
     color: _gray900,
     placeholder: _gray500,
+  },
+  comparison: {
+    added: _green400,
+    modified: _yellow400,
+    removed: _red400,
   },
 } as const;
 

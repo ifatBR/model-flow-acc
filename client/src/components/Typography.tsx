@@ -57,13 +57,14 @@ export function BodyText({
   );
 }
 
-export function Caption({ children }: ChildrenProps) {
+export function Caption({ children, ...rest }: ChildrenProps) {
   return (
     <Text
       as="span"
       fontSize={FONT_SIZES.sm}
       fontWeight={FONT_WEIGHTS.regular}
       color={COLORS.text.tertiary}
+      {...rest}
     >
       {children}
     </Text>
@@ -80,6 +81,23 @@ export function ErrorText({ children, bold }: ErorTextProps) {
       fontSize={FONT_SIZES.sm}
       fontWeight={bold ? FONT_WEIGHTS.bold : FONT_WEIGHTS.regular}
       color={COLORS.semantic.error}
+    >
+      {children}
+    </Text>
+  );
+}
+
+interface ListTextProps extends ChildrenProps {
+  color?: string;
+}
+
+export function ListText({ children, color }: ListTextProps) {
+  return (
+    <Text
+      m={0}
+      fontSize={FONT_SIZES.base}
+      fontWeight={FONT_WEIGHTS.regular}
+      color={color || COLORS.text.primary}
     >
       {children}
     </Text>
