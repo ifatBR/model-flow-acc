@@ -81,3 +81,19 @@ export const getItemVersions = (projectId: string, itemId: string) =>
 
 export const fetchVersionElements = (itemId: string, versionNumber: number) =>
   get<ModelElement[]>(`/models/${encodeURIComponent(itemId)}/versions/${versionNumber}/elements`);
+
+export async function saveVersionElements(
+  itemId: string,
+  versionNumber: number,
+  elements: ModelElement[],
+): Promise<void> {
+  const res = await fetch(
+    `${API_BASE}/models/${encodeURIComponent(itemId)}/versions/${versionNumber}/elements`,
+    {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(elements),
+    },
+  );
+  if (!res.ok) throw new Error(`Failed to save elements: ${res.status} ${res.statusText}`);
+}

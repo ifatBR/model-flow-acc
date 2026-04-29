@@ -10,8 +10,8 @@ import {
 } from "@chakra-ui/react";
 import { ArrowLeft, ArrowRight } from "lucide-react";
 import { Buffer } from "buffer";
-import { fetchVersionElements } from "@/api/project";
 import type { ItemVersion, ModelElement } from "@/api/project";
+import { ensureSnapshot } from "@/utils/snapshotStore";
 import { Tooltip } from "@/components/ui/tooltip";
 
 // ─── Types ───────────────────────────────────────────────────────────────────
@@ -249,14 +249,20 @@ export function CompareVersionsModal({
     const later = Math.max(selectedV1, selectedV2);
     const earlier = Math.min(selectedV1, selectedV2);
 
+    const laterVersion = versions.find((v) => v.versionNumber === later);
+    const earlierVersion = versions.find((v) => v.versionNumber === earlier);
+    if (!laterVersion || !earlierVersion) return;
+
+    const laterUrn = Buffer.from(laterVersion.id).toString("base64");
+    const earlierUrn = Buffer.from(earlierVersion.id).toString("base64");
+
     setComparing(true);
     idMapRef.current = null;
     try {
-      const [earlierElements, laterElements] = await Promise.all([
-        fetchVersionElements(itemId, earlier),
-        fetchVersionElements(itemId, later),
-      ]);
-      setResult(runComparison(earlierElements, laterElements));
+      const earlierSnap = await ensureSnapshot(earlierUrn, itemId, earlier);
+      const laterSnap = await ensureSnapshot(laterUrn, itemId, later);
+
+      setResult(runComparison(earlierSnap.elements, laterSnap.elements));
       setLaterVersionNum(later);
       setEarlierVersionNum(earlier);
       setActiveTab("added");

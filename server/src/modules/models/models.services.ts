@@ -1,4 +1,4 @@
-import { readFile } from 'fs/promises';
+import { readFile, writeFile, mkdir } from 'fs/promises';
 import { join } from 'path';
 
 // Resolves to server/data/models/ relative to this compiled file in dist/modules/models/
@@ -16,4 +16,11 @@ export async function getVersionElements(itemId: string, versionNumber: number) 
   } catch {
     return [];
   }
+}
+
+export async function saveVersionElements(itemId: string, versionNumber: number, elements: unknown[]) {
+  const dir = join(DATA_DIR, sanitizeItemId(itemId));
+  await mkdir(dir, { recursive: true });
+  const filePath = join(dir, `v${versionNumber}.json`);
+  await writeFile(filePath, JSON.stringify(elements, null, 2), 'utf-8');
 }
