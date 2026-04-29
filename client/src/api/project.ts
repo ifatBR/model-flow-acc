@@ -29,9 +29,33 @@ export interface FolderItem {
   hidden?: boolean;
 }
 
-export interface ItemVersions {
+export interface ItemVersion {
   type: "versions";
   id: string;
+  versionNumber: number;
+  displayName?: string;
+}
+
+
+export interface BoundingBox {
+  min: { x: number; y: number; z: number };
+  max: { x: number; y: number; z: number };
+}
+
+export interface ModelElement {
+  externalId: string;
+  properties: {
+    category?: string;
+    name?: string;
+    level?: string;
+    material?: string;
+    length?: string;
+    area?: string;
+    height?: string;
+    thickness?: string;
+    [key: string]: unknown;
+  };
+  boundingBox?: BoundingBox;
 }
 
 async function get<T>(path: string): Promise<T> {
@@ -53,4 +77,7 @@ export const fetchFolderContents = (projectId: string, folderId: string) =>
   get<FolderItem[]>(`/projects/${projectId}/folders/${folderId}/contents`);
 
 export const getItemVersions = (projectId: string, itemId: string) =>
-  get<ItemVersions[]>(`/projects/${projectId}/items/${itemId}/versions`);
+  get<ItemVersion[]>(`/projects/${projectId}/items/${itemId}/versions`);
+
+export const fetchVersionElements = (itemId: string, versionNumber: number) =>
+  get<ModelElement[]>(`/models/${encodeURIComponent(itemId)}/versions/${versionNumber}/elements`);

@@ -25,5 +25,10 @@ export async function getItemVersions(projectId: string, itemId: string) {
     },
   );
   const { data } = await (await res).json();
-  return data;
+  return (data as any[]).map((v) => ({
+    id: v.id as string,
+    type: v.type as string,
+    versionNumber: (v.attributes?.versionNumber ?? 0) as number,
+    displayName: (v.attributes?.displayName ?? '') as string,
+  }));
 }

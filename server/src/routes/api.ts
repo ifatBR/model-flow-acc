@@ -4,6 +4,7 @@ import { deriviativeRoutes } from '@modules/deriviative/deriviative.routes';
 import { hubRoutes } from '@modules/hubs/hubs.routes';
 import { projectRoutes } from '@modules/projects/projects.routes';
 import { authRoutes } from '@modules/auth/auth.routes';
+import { modelsRoutes } from '@modules/models/models.routes';
 
 async function apiRoutes(fastify: FastifyInstance) {
   fastify.register(authRoutes, { prefix: '/auth' });
@@ -11,6 +12,7 @@ async function apiRoutes(fastify: FastifyInstance) {
   fastify.register(deriviativeRoutes, { prefix: '/deriviative' });
   fastify.register(hubRoutes, { prefix: '/hubs' });
   fastify.register(projectRoutes, { prefix: '/projects' });
+  fastify.register(modelsRoutes, { prefix: '/models' });
 }
 
 export default apiRoutes;

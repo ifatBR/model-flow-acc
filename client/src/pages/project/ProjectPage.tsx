@@ -10,22 +10,22 @@ import {
   fetchTopFolders,
   fetchFolderContents,
   getItemVersions,
-} from "@/api/browser";
-import type { FolderItem } from "@/api/browser";
+} from "@/api/project";
+import type { FolderItem, ItemVersion } from "@/api/project";
 import { ViewerModal } from "./components/ViewerModal";
 import { Buffer } from "buffer";
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
-type BrowserNodeType = "hub" | "project" | "folder" | "file";
+type ProjectNodeType = "hub" | "project" | "folder" | "file";
 
-type BrowserNode = {
+type ProjectNode = {
   value: string;
   label: string;
-  nodeType: BrowserNodeType;
+  nodeType: ProjectNodeType;
   projectId?: string;
   hubId?: string;
-  children?: BrowserNode[]; // undefined = leaf (file), [] = expandable branch
+  children?: ProjectNode[]; // undefined = leaf (file), [] = expandable branch
   childrenCount?: number; // non-null value tells Ark UI this is a branch even when children: []
 };
 
@@ -35,7 +35,7 @@ function mapContents(
   items: FolderItem[],
   projectId: string,
   hubId?: string,
-): BrowserNode[] {
+): ProjectNode[] {
   return items
     .filter((i) => !i.hidden)
     .map((item) => ({
@@ -43,7 +43,7 @@ function mapContents(
       label: item.name,
       nodeType: (item.type === "folders"
         ? "folder"
-        : "file") as BrowserNodeType,
+        : "file") as ProjectNodeType,
       projectId,
       hubId,
       children: item.type === "folders" ? [] : undefined,
@@ -53,8 +53,8 @@ function mapContents(
 
 function buildCollection(
   hubs: { id: string; name: string }[],
-): TreeCollection<BrowserNode> {
-  return createTreeCollection<BrowserNode>({
+): TreeCollection<ProjectNode> {
+  return createTreeCollection<ProjectNode>({
     rootNode: {
       value: "root",
       label: "Root",
@@ -74,21 +74,21 @@ const EMPTY_COLLECTION = buildCollection([]);
 
 // ─── Icon helper ─────────────────────────────────────────────────────────────
 
-const ICONS: Record<BrowserNodeType, React.ElementType> = {
+const ICONS: Record<ProjectNodeType, React.ElementType> = {
   hub: Building2,
   project: Layers,
   folder: Folder,
   file: FileText,
 };
 
-function NodeIcon({ type }: { type: BrowserNodeType }) {
+function NodeIcon({ type }: { type: ProjectNodeType }) {
   const Icon = ICONS[type];
   return <Icon size={14} />;
 }
 
 // ─── Component ───────────────────────────────────────────────────────────────
 
-export function BrowserPage() {
+export function ProjectPage() {
   const queryClient = useQueryClient();
 
   const {
@@ -102,17 +102,36 @@ export function BrowserPage() {
 
   const [urn, setUrn] = useState<string | null>(null);
   const [previewFileName, setPreviewFileName] = useState<string | null>(null);
+  const [versions, setVersions] = useState<ItemVersion[]>([]);
+  const [itemId, setItemId] = useState<string | null>(null);
+  const [currentVersionNumber, setCurrentVersionNumber] = useState(0);
   const [collection, setCollection] =
-    useState<TreeCollection<BrowserNode>>(EMPTY_COLLECTION);
+    useState<TreeCollection<ProjectNode>>(EMPTY_COLLECTION);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const hubsInitialized = useRef(false);
 
-  const viewItem = async (itemName: string, itemId: string, projectId: any) => {
-    const itemVersions = await getItemVersions(projectId, itemId);
-    const viewUrn = itemVersions[0]?.id;
-    const encodedUrn = Buffer.from(viewUrn).toString("base64");
+  const onVersionChange = useCallback(
+    (newUrn: string, versionNumber: number) => {
+      setUrn(newUrn);
+      setCurrentVersionNumber(versionNumber);
+    },
+    [],
+  );
+
+  const viewItem = async (
+    itemName: string,
+    currentItemId: string,
+    projectId: any,
+  ) => {
+    const itemVersions = await getItemVersions(projectId, currentItemId);
+    const latest = itemVersions[0];
+    if (!latest) return;
+    const encodedUrn = Buffer.from(latest.id).toString("base64");
     setPreviewFileName(itemName);
     setUrn(encodedUrn);
+    setVersions(itemVersions);
+    setItemId(currentItemId);
+    setCurrentVersionNumber(latest.versionNumber);
   };
 
   // Populate the collection with hubs exactly once (prevents re-creation on refetch)
@@ -125,7 +144,7 @@ export function BrowserPage() {
 
   // Called by the TreeView when a branch is expanded for the first time
   const loadChildren = useCallback(
-    async ({ node }: { node: BrowserNode }): Promise<BrowserNode[]> => {
+    async ({ node }: { node: ProjectNode }): Promise<ProjectNode[]> => {
       // Clear any previous error for this node
       setErrors((prev) => {
         const { [node.value]: _removed, ...rest } = prev;
@@ -178,7 +197,7 @@ export function BrowserPage() {
 
   // Sync the collection after children load so controlled state stays accurate
   const handleLoadChildrenComplete = useCallback(
-    ({ collection: updated }: { collection: TreeCollection<BrowserNode> }) => {
+    ({ collection: updated }: { collection: TreeCollection<ProjectNode> }) => {
       setCollection(updated);
     },
     [],
@@ -186,7 +205,7 @@ export function BrowserPage() {
 
   // Track per-node errors for inline display
   const handleLoadChildrenError = useCallback(
-    ({ nodes }: { nodes: { node: BrowserNode; error: Error }[] }) => {
+    ({ nodes }: { nodes: { node: ProjectNode; error: Error }[] }) => {
       const newErrors: Record<string, string> = {};
       for (const { node, error } of nodes) {
         newErrors[node.value] = error.message || "Failed to load";
@@ -223,7 +242,7 @@ export function BrowserPage() {
         onLoadChildrenError={handleLoadChildrenError}
       >
         <TreeView.Tree>
-          <TreeView.Node<BrowserNode>
+          <TreeView.Node<ProjectNode>
             indentGuide={<TreeView.BranchIndentGuide />}
             render={({ node, nodeState }) => {
               const error = errors[node.value];
@@ -262,7 +281,15 @@ export function BrowserPage() {
           />
         </TreeView.Tree>
       </TreeView.Root>
-      <ViewerModal fileName={previewFileName} browseUrn={urn} setUrn={setUrn} />
+      <ViewerModal
+        fileName={previewFileName}
+        browseUrn={urn}
+        setUrn={setUrn}
+        versions={versions}
+        itemId={itemId}
+        currentVersionNumber={currentVersionNumber}
+        onVersionChange={onVersionChange}
+      />
     </Box>
   );
 }

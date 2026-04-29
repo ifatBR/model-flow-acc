@@ -9,10 +9,9 @@
     "strict": true,
     "types": ["node"],
     "paths": {
-      "@app/types/*": ["../packages/types/*"],
       "@modules/*": ["./src/modules/*"]
     }
   },
-  "include": ["src/**/*.ts", "../packages/types/roles.ts"],
+  "include": ["src/**/*.ts"],
   "exclude": ["node_modules", "dist"]
 }

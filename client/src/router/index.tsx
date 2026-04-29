@@ -3,7 +3,7 @@ import { ROUTES } from "../constants/routes";
 import { AppLayout } from "../components/AppLayout";
 import { ViewerPage } from "@/pages/viewer/ViewerPage";
 import { LandingPage } from "@/pages/landing/LandingPage";
-import { BrowserPage } from "@/pages/browser/BrowserPage";
+import { ProjectPage } from "@/pages/project/ProjectPage";
 import { LayoutProvider } from "@/context/LayoutContext";
 import { RouteErrorPage } from "@/components/RouteErrorPage";
 
@@ -20,7 +20,7 @@ const routerConfig = [
     children: [
       { index: true, element: <Navigate to={ROUTES.LANDING} replace /> },
       { path: ROUTES.VIEWER, element: <ViewerPage /> },
-      { path: ROUTES.BROWSER, element: <BrowserPage /> },
+      { path: ROUTES.PROJECT, element: <ProjectPage /> },
     ],
   },
 ];

@@ -1,18 +1,30 @@
 export function setupViewerToolbar(
   viewer: Autodesk.Viewing.GuiViewer3D,
-  onClickBtn: () => void,
+  onClickVersionsButton: () => void,
+  onClickFishBtn: () => void,
 ) {
-  const button = new window.Autodesk.Viewing.UI.Button("my-custom-button");
-  button.setToolTip("Fish");
+  const fishButton = new window.Autodesk.Viewing.UI.Button("fish-button");
+  fishButton.setToolTip("Fish");
 
-  button.onClick = () => {
-    onClickBtn();
+  fishButton.onClick = () => {
+    onClickFishBtn();
   };
-  const group = new window.Autodesk.Viewing.UI.ControlGroup("my-custom-group");
-  group.addControl(button);
 
+  const versionsButton = new window.Autodesk.Viewing.UI.Button(
+    "versions-button",
+  );
+  versionsButton.setToolTip("Compare Versions");
+
+  versionsButton.onClick = () => {
+    onClickVersionsButton();
+  };
+
+  const group = new window.Autodesk.Viewing.UI.ControlGroup("demo-group");
+  group.addControl(fishButton);
+
+  group.addControl(versionsButton);
   const addToolbar = () => {
-    if (!viewer.toolbar?.getControl("my-custom-group")) {
+    if (!viewer.toolbar?.getControl("demo-group")) {
       viewer.toolbar.addControl(group);
     }
   };
