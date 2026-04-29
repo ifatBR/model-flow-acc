@@ -1,9 +1,6 @@
-import { COLORS, ICON_SIZES, SPACING } from "@/styles/designTokens";
-import { Box, Flex, Tabs, Text } from "@chakra-ui/react";
-import { ArrowRight } from "lucide-react";
+import { Box, Tabs } from "@chakra-ui/react";
 import { useEffect, useState } from "react";
 import type { ComparisonResult, ListElement } from ".";
-import { Button } from "@/components/Button";
 import { ItemsList } from "./ItemsList";
 
 const HIGHLIGHT_COLOR = {
@@ -17,8 +14,6 @@ type TabType = "added" | "modified" | "removed";
 
 interface DiffViewProps {
   result: ComparisonResult;
-  earlierVersionNum: number | null;
-  laterVersionNum: number | null;
   handleItemClick: (
     element: ListElement,
     toLaterVer: boolean,
@@ -26,12 +21,7 @@ interface DiffViewProps {
   ) => void;
 }
 
-export function DiffView({
-  result,
-  earlierVersionNum,
-  laterVersionNum,
-  handleItemClick,
-}: DiffViewProps) {
+export function DiffView({ result, handleItemClick }: DiffViewProps) {
   const [activeTab, setActiveTab] = useState<TabType>("added");
 
   useEffect(() => {
@@ -39,16 +29,6 @@ export function DiffView({
   }, []);
   return (
     <Box>
-      {/* Subtitle */}
-      <Box px={4} py={2} borderBottomWidth="1px">
-        <Flex align="center" gap={1} fontSize="xs">
-          <Text color="gray.500">Comparing versions:</Text>
-          <Text fontWeight="medium">v{earlierVersionNum}</Text>
-          <ArrowRight size={ICON_SIZES.xs} />
-          <Text fontWeight="medium">v{laterVersionNum}</Text>
-        </Flex>
-      </Box>
-
       {/* Tabs */}
       <Tabs.Root
         value={activeTab}

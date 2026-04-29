@@ -60,8 +60,8 @@ export const COLORS = {
   },
   text: {
     primary: _white,
-    secondary: _gray100,
-    tertiary: _gray300,
+    secondary: _gray300,
+    tertiary: _gray500,
     inverse: _gray900,
   },
   border: {

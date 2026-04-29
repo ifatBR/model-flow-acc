@@ -1,13 +1,12 @@
 import { useState, useCallback, useRef, useEffect } from "react";
-import { Box, Flex, Text, Tabs, NativeSelect, Spinner } from "@chakra-ui/react";
-import { ArrowLeft, ArrowRight } from "lucide-react";
+import { Box, Flex, Text, NativeSelect, Spinner } from "@chakra-ui/react";
+import { ArrowLeft, SpaceIcon, TriangleAlert } from "lucide-react";
 import { Buffer } from "buffer";
 import type { ItemVersion, ModelElement } from "@/api/project";
 import { ensureSnapshot } from "@/utils/snapshotStore";
 import { Tooltip } from "@/components/ui/tooltip";
 import { runComparison } from "../../helpers/comparison.helper";
 import { isolateAndHighlight } from "../../helpers/viewer.helper";
-import { ItemsList } from "./ItemsList";
 import { Button } from "@/components/Button";
 import {
   BORDER_WIDTHS,
@@ -18,7 +17,7 @@ import {
   SPACING,
   Z_INDEX,
 } from "@/styles/designTokens";
-import { BodyText, Caption, ErrorText } from "@/components/Typography";
+import { BodyText, Caption, SectionTitle } from "@/components/Typography";
 import { DiffView } from "./DiffView";
 
 // ─── Types ───────────────────────────────────────────────────────────────────
@@ -210,14 +209,22 @@ export function CompareVersionsModal({
         <Flex align="center" gap={2}>
           {result && (
             <Tooltip content="Select versions">
-              <Button size="xs" variant="ghost" onClick={handleBack} p={1}>
+              <Button size="sm" variant="ghost" onClick={handleBack} p={1}>
                 <ArrowLeft size={ICON_SIZES.xs} />
               </Button>
             </Tooltip>
           )}
-          <Text fontWeight="semibold" fontSize="sm">
-            {result ? "Difference" : "Compare Versions"}
-          </Text>
+          <Box ms={SPACING[2]}>
+            {result ? (
+              <Flex align="center" gap={1} fontSize="xs">
+                <SectionTitle>
+                  Comparing v{earlierVersionNum}: v{laterVersionNum}
+                </SectionTitle>
+              </Flex>
+            ) : (
+              <SectionTitle> Compare Versions</SectionTitle>
+            )}
+          </Box>
         </Flex>
         <Button size="xs" variant="ghost" onClick={onClose} aria-label="Close">
           ✕
@@ -226,30 +233,35 @@ export function CompareVersionsModal({
 
       {/* ── Version banner (diff view only) ── */}
       {result && laterVersionNum !== null && !confirm && (
-        <Box
-          px={SPACING[4]}
-          py={SPACING[2]}
+        <Flex
           bg={COLORS.bg.elevated}
+          px={SPACING[4]}
+          py={SPACING[4]}
+          align="center"
+          justify="space-between"
           borderBottomWidth={BORDER_WIDTHS.sm}
-          flexShrink={0}
         >
-          <Flex align="center" justify="space-between">
+          <Box flexShrink={0}>
             <BodyText>Viewer: Version {currentVersionNumber}</BodyText>
-            {otherVersionNum !== null && (
-              <Button
-                variant="secondary"
-                onClick={() => switchToVersion(otherVersionNum)}
-              >
-                Switch to v{otherVersionNum}
-              </Button>
+            {!isCurrentLatest && (
+              <Flex align="center" mt={SPACING[2]}>
+                <TriangleAlert size={ICON_SIZES.xs} />
+                <Caption {...{ color: COLORS.text.tertiary, ms: SPACING[2] }}>
+                  This is not the latest version
+                </Caption>
+              </Flex>
             )}
-          </Flex>
-          {!isCurrentLatest && (
-            <Caption {...{ color: COLORS.semantic.warning }}>
-              * This is not the latest version
-            </Caption>
+          </Box>
+          {otherVersionNum !== null && (
+            <Button
+              size="sm"
+              variant="secondary"
+              onClick={() => switchToVersion(otherVersionNum)}
+            >
+              Switch to v{otherVersionNum}
+            </Button>
           )}
-        </Box>
+        </Flex>
       )}
 
       {/* ── Inline confirmation ── */}
@@ -257,7 +269,7 @@ export function CompareVersionsModal({
         <Box
           px={SPACING[4]}
           py={SPACING[2]}
-          bg={COLORS.bg.inverse}
+          bg={COLORS.bg.elevated}
           borderBottomWidth="1px"
           flexShrink={0}
         >
@@ -343,12 +355,7 @@ export function CompareVersionsModal({
             </Button>
           </Box>
         ) : (
-          <DiffView
-            result={result}
-            earlierVersionNum={earlierVersionNum}
-            laterVersionNum={laterVersionNum}
-            handleItemClick={handleItemClick}
-          />
+          <DiffView result={result} handleItemClick={handleItemClick} />
         )}
       </Box>
     </Flex>
