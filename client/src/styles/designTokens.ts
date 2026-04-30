@@ -1,8 +1,9 @@
 const _blue900 = "#021947";
 const _blue700 = "#062273";
 const _blue100 = "#e0e0f5";
-const _teal400 = "#45C9B2";
 const _teal300 = "#35b09b";
+const _teal400 = "#45C9B2";
+const _teal700 = "#157968";
 const _teal100 = "#E0F7F4";
 const _lime600 = "#48C96D";
 const _lime400 = "#AEE553";
@@ -22,6 +23,7 @@ const _gray200 = "#EEEEEE";
 const _gray300 = "#DDDDDD";
 const _gray500 = "#9E9E9E";
 const _gray600 = "#6B6B6B";
+const _gray700 = "#4b4b4b";
 const _gray800 = "#2f2f2f";
 const _gray900 = "#1A1A1A";
 const _black = "#09090b";
@@ -86,16 +88,16 @@ export const COLORS = {
     itemHoverBg: _gray100,
   },
   btn: {
-    primary: { bg: _gray900, color: _white, hoverBg: _blue700 },
+    primary: { bg: _gray600, color: _white, hoverBg: _gray700 },
     secondary: {
       bg: "transparent",
-      color: _blue900,
-      border: _blue900,
-      hoverBg: _blue100,
+      color: _gray300,
+      border: _gray300,
+      hoverBg: _gray700,
     },
     danger: { bg: _red400, color: _white, hoverBg: _red300 },
     disabled: { bg: _gray200, color: _gray500 },
-    reversed: { bg: _white, color: _gray900, hoverBg: _blue100 },
+    reversed: { bg: _white, color: _gray700, hoverBg: _gray300 },
   },
   input: {
     bg: _white,

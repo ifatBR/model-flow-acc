@@ -1,7 +1,8 @@
 import { Box, Tabs } from "@chakra-ui/react";
 import { useEffect, useState } from "react";
 import type { ComparisonResult, ListElement } from ".";
-import { ItemsList } from "./ItemsList";
+import { TabItemList } from "./TabItemList";
+import { FONT_SIZES } from "@/styles/designTokens";
 
 const HIGHLIGHT_COLOR = {
   added: { r: 0, g: 1, b: 0 },
@@ -12,7 +13,7 @@ const HIGHLIGHT_COLOR = {
 
 type TabType = "added" | "modified" | "removed";
 
-interface DiffViewProps {
+interface DiffTabsProps {
   result: ComparisonResult;
   handleItemClick: (
     element: ListElement,
@@ -21,7 +22,7 @@ interface DiffViewProps {
   ) => void;
 }
 
-export function DiffView({ result, handleItemClick }: DiffViewProps) {
+export function DiffTabs({ result, handleItemClick }: DiffTabsProps) {
   const [activeTab, setActiveTab] = useState<TabType>("added");
 
   useEffect(() => {
@@ -36,20 +37,20 @@ export function DiffView({ result, handleItemClick }: DiffViewProps) {
         size="sm"
       >
         <Tabs.List>
-          <Tabs.Trigger value="added" fontSize="xs">
+          <Tabs.Trigger value="added" fontSize={FONT_SIZES.sm}>
             Added ({result.added.length})
           </Tabs.Trigger>
-          <Tabs.Trigger value="modified" fontSize="xs">
+          <Tabs.Trigger value="modified" fontSize={FONT_SIZES.sm}>
             Modified ({result.modified.length})
           </Tabs.Trigger>
-          <Tabs.Trigger value="removed" fontSize="xs">
+          <Tabs.Trigger value="removed" fontSize={FONT_SIZES.sm}>
             Removed ({result.removed.length})
           </Tabs.Trigger>
         </Tabs.List>
 
         {/* Added */}
         <Tabs.Content value="added" p={0}>
-          <ItemsList
+          <TabItemList
             items={result.added}
             icon="+"
             color="green.500"
@@ -62,7 +63,7 @@ export function DiffView({ result, handleItemClick }: DiffViewProps) {
 
         {/* Modified */}
         <Tabs.Content value="modified" p={0}>
-          <ItemsList
+          <TabItemList
             items={result.modified}
             icon="~"
             color="yellow.500"
@@ -75,7 +76,7 @@ export function DiffView({ result, handleItemClick }: DiffViewProps) {
 
         {/* Removed */}
         <Tabs.Content value="removed" p={0}>
-          <ItemsList
+          <TabItemList
             items={result.removed}
             icon="~"
             color="red.500"

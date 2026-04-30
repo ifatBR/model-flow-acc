@@ -5,20 +5,20 @@ import { Box } from "@chakra-ui/react";
 import { COLORS, SPACING } from "@/styles/designTokens";
 import { getChangeDescription } from "../../helpers/display.helper";
 
-interface ItemsListProps {
+interface TabItemListProps {
   items: ListElement[];
   icon: string;
   color: string;
   emptyListMsg: string;
   handleItemClick: (elem: ModelElement) => void;
 }
-export function ItemsList({
+export function TabItemList({
   items,
   icon,
   color,
   emptyListMsg,
   handleItemClick,
-}: ItemsListProps) {
+}: TabItemListProps) {
   function getElementDisplayName(elem: ModelElement): string {
     const { category, name, level } = elem.properties;
     const cat = category ?? "Unknown";
@@ -37,8 +37,8 @@ export function ItemsList({
         items.map((element) => (
           <Box
             key={element.externalId}
-            px={4}
-            py={2}
+            px={SPACING[4]}
+            py={SPACING[2]}
             cursor="pointer"
             _hover={{ bg: COLORS.highlight.tertiary }}
             borderBottomWidth="1px"

@@ -1,24 +1,16 @@
 import { useState, useCallback, useRef, useEffect } from "react";
-import { Box, Flex, Text, NativeSelect, Spinner } from "@chakra-ui/react";
-import { ArrowLeft, SpaceIcon, TriangleAlert } from "lucide-react";
+import { Box, Flex } from "@chakra-ui/react";
 import { Buffer } from "buffer";
 import type { ItemVersion, ModelElement } from "@/api/project";
 import { ensureSnapshot } from "@/utils/snapshotStore";
-import { Tooltip } from "@/components/ui/tooltip";
 import { runComparison } from "../../helpers/comparison.helper";
 import { isolateAndHighlight } from "../../helpers/viewer.helper";
-import { Button } from "@/components/Button";
-import {
-  BORDER_WIDTHS,
-  COLORS,
-  ICON_SIZES,
-  RADII,
-  SHADOWS,
-  SPACING,
-  Z_INDEX,
-} from "@/styles/designTokens";
-import { BodyText, Caption, SectionTitle } from "@/components/Typography";
-import { DiffView } from "./DiffView";
+import { COLORS, RADII, SHADOWS, Z_INDEX } from "@/styles/designTokens";
+import { DiffTabs } from "./DiffTabs";
+import { VersionSelcection } from "./VersionSelection";
+import { ConfirmBanner } from "./ConfirmBanner";
+import { VersionBanner } from "./VersionBanner";
+import { CompareHeader } from "./CompareHeader";
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -134,9 +126,9 @@ export function CompareVersionsModal({
 
   const handleBack = () => {
     setResult(null);
-    // setLaterVersionNum(null);
-    // setEarlierVersionNum(null);
-    // setConfirm(null);
+    setLaterVersionNum(null);
+    setEarlierVersionNum(null);
+    setConfirm(null);
   };
 
   const handleItemClick = useCallback(
@@ -182,7 +174,7 @@ export function CompareVersionsModal({
         ? earlierVersionNum
         : laterVersionNum
       : null;
-  console.log("confirm:", confirm);
+
   return (
     <Flex
       position="absolute"
@@ -198,164 +190,41 @@ export function CompareVersionsModal({
       flexDirection="column"
     >
       {/* ── Header ── */}
-      <Flex
-        align="center"
-        justify="space-between"
-        px={4}
-        py={3}
-        borderBottomWidth="1px"
-        flexShrink={0}
-      >
-        <Flex align="center" gap={2}>
-          {result && (
-            <Tooltip content="Select versions">
-              <Button size="sm" variant="ghost" onClick={handleBack} p={1}>
-                <ArrowLeft size={ICON_SIZES.xs} />
-              </Button>
-            </Tooltip>
-          )}
-          <Box ms={SPACING[2]}>
-            {result ? (
-              <Flex align="center" gap={1} fontSize="xs">
-                <SectionTitle>
-                  Comparing v{earlierVersionNum}: v{laterVersionNum}
-                </SectionTitle>
-              </Flex>
-            ) : (
-              <SectionTitle> Compare Versions</SectionTitle>
-            )}
-          </Box>
-        </Flex>
-        <Button size="xs" variant="ghost" onClick={onClose} aria-label="Close">
-          ✕
-        </Button>
-      </Flex>
+      <CompareHeader
+        result={result}
+        earlierVersionNum={earlierVersionNum}
+        laterVersionNum={laterVersionNum}
+        handleBack={handleBack}
+        onClose={onClose}
+      />
 
       {/* ── Version banner (diff view only) ── */}
       {result && laterVersionNum !== null && !confirm && (
-        <Flex
-          bg={COLORS.bg.elevated}
-          px={SPACING[4]}
-          py={SPACING[4]}
-          align="center"
-          justify="space-between"
-          borderBottomWidth={BORDER_WIDTHS.sm}
-        >
-          <Box flexShrink={0}>
-            <BodyText>Viewer: Version {currentVersionNumber}</BodyText>
-            {!isCurrentLatest && (
-              <Flex align="center" mt={SPACING[2]}>
-                <TriangleAlert size={ICON_SIZES.xs} />
-                <Caption {...{ color: COLORS.text.tertiary, ms: SPACING[2] }}>
-                  This is not the latest version
-                </Caption>
-              </Flex>
-            )}
-          </Box>
-          {otherVersionNum !== null && (
-            <Button
-              size="sm"
-              variant="secondary"
-              onClick={() => switchToVersion(otherVersionNum)}
-            >
-              Switch to v{otherVersionNum}
-            </Button>
-          )}
-        </Flex>
+        <VersionBanner
+          currentVersionNumber={currentVersionNumber}
+          otherVersionNum={otherVersionNum}
+          isCurrentLatest={isCurrentLatest}
+          switchToVersion={switchToVersion}
+        />
       )}
 
       {/* ── Inline confirmation ── */}
-      {confirm && (
-        <Box
-          px={SPACING[4]}
-          py={SPACING[2]}
-          bg={COLORS.bg.elevated}
-          borderBottomWidth="1px"
-          flexShrink={0}
-        >
-          <Caption {...{ color: COLORS.semantic.warning }}>
-            {confirm.message}
-          </Caption>
-          <Flex gap={SPACING[2]} mt={SPACING[2]}>
-            <Button size="xs" onClick={confirm.onConfirm}>
-              Yes
-            </Button>
-            <Button
-              size="xs"
-              variant="secondary"
-              onClick={() => setConfirm(null)}
-            >
-              No
-            </Button>
-          </Flex>
-        </Box>
-      )}
+      {confirm && <ConfirmBanner confirm={confirm} setConfirm={setConfirm} />}
 
       {/* ── Body ── */}
       <Box overflowY="auto" flex={1}>
         {!result ? (
-          // Version selection
-          <Box p={4}>
-            <Caption>Select two versions to compare</Caption>
-            <Flex gap={SPACING[2]} my={SPACING[4]}>
-              <NativeSelect.Root flex={1} size="sm">
-                <NativeSelect.Field
-                  value={selectedV1 ?? ""}
-                  onChange={(e) =>
-                    setSelectedV1(
-                      e.target.value ? Number(e.target.value) : null,
-                    )
-                  }
-                  fontSize="xs"
-                >
-                  <option value="">Version…</option>
-                  {versions.map((v) => (
-                    <option
-                      key={v.versionNumber}
-                      value={v.versionNumber}
-                      disabled={v.versionNumber === selectedV2}
-                    >
-                      Version {v.versionNumber}
-                    </option>
-                  ))}
-                </NativeSelect.Field>
-              </NativeSelect.Root>
-
-              <NativeSelect.Root flex={1} size="sm">
-                <NativeSelect.Field
-                  value={selectedV2 ?? ""}
-                  onChange={(e) =>
-                    setSelectedV2(
-                      e.target.value ? Number(e.target.value) : null,
-                    )
-                  }
-                  fontSize="xs"
-                >
-                  <option value="">Version…</option>
-                  {versions.map((v) => (
-                    <option
-                      key={v.versionNumber}
-                      value={v.versionNumber}
-                      disabled={v.versionNumber === selectedV1}
-                    >
-                      Version {v.versionNumber}
-                    </option>
-                  ))}
-                </NativeSelect.Field>
-              </NativeSelect.Root>
-            </Flex>
-
-            <Button
-              w="full"
-              size="sm"
-              disabled={selectedV1 === null || selectedV2 === null || comparing}
-              onClick={handleCompare}
-            >
-              {comparing ? <Spinner size="xs" /> : "Compare"}
-            </Button>
-          </Box>
+          <VersionSelcection
+            versions={versions}
+            comparing={comparing}
+            selectedV1={selectedV1}
+            setSelectedV1={setSelectedV1}
+            selectedV2={selectedV2}
+            setSelectedV2={setSelectedV2}
+            handleCompare={handleCompare}
+          />
         ) : (
-          <DiffView result={result} handleItemClick={handleItemClick} />
+          <DiffTabs result={result} handleItemClick={handleItemClick} />
         )}
       </Box>
     </Flex>

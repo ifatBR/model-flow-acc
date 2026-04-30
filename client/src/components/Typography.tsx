@@ -43,6 +43,7 @@ export function BodyText({
   children,
   align,
   secondary = false,
+  ...rest
 }: BodyTextProps) {
   return (
     <Text
@@ -51,6 +52,7 @@ export function BodyText({
       fontSize={FONT_SIZES.base}
       fontWeight={FONT_WEIGHTS.regular}
       color={secondary ? COLORS.text.secondary : COLORS.text.primary}
+      {...rest}
     >
       {children}
     </Text>
