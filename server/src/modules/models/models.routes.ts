@@ -1,5 +1,9 @@
 import { FastifyInstance } from 'fastify';
-import { getVersionElements, saveVersionElements } from './models.services';
+import {
+  getVersionElements,
+  saveVersionElements,
+  saveVersionElementsChunks,
+} from './models.services';
 
 export async function modelsRoutes(app: FastifyInstance) {
   app.get<{ Params: { itemId: string; versionNum: string } }>(
@@ -9,6 +13,15 @@ export async function modelsRoutes(app: FastifyInstance) {
       return getVersionElements(decodeURIComponent(itemId), parseInt(versionNum, 10));
     },
   );
+
+  app.post<{
+    Params: { itemId: string; versionNum: string };
+    Body: { chunkIndex: number; isLastChunk: boolean; elements: unknown[] };
+  }>('/:itemId/versions/:versionNum/elements/chunks', async (req, reply) => {
+    const { itemId, versionNum } = req.params;
+    await saveVersionElementsChunks(decodeURIComponent(itemId), parseInt(versionNum, 10), req.body);
+    return reply.code(204).send();
+  });
 
   app.post<{ Params: { itemId: string; versionNum: string }; Body: unknown[] }>(
     '/:itemId/versions/:versionNum/elements',

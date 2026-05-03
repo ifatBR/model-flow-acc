@@ -117,6 +117,7 @@ export function CompareVersionsModal({
   const doIsolate = useCallback(
     (elem: ModelElement, color: { r: number; g: number; b: number }) => {
       const viewer = viewerRef.current;
+
       if (viewer) {
         isolateAndHighlight(viewer, elem.externalId, color, idMapRef);
       }

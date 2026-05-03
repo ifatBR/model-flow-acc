@@ -1,12 +1,14 @@
 import { Box } from "@chakra-ui/react";
 import Fish from "./Fish";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { getAccessToken } from "@/api/auth";
 import { setupViewerToolbar } from "@/utils/viewer.utils";
 import { useLayout } from "@/context/LayoutContext";
 import { SIDEBAR } from "@/styles/designTokens";
 import { CompareVersionsModal } from "@/pages/project/components/CompareVersionsModal";
 import type { ItemVersion } from "@/api/project";
+import { clearIsolateAndHighlight } from "@/pages/project/helpers/viewer.helper";
+import { Buffer } from "buffer";
 
 interface ApsViewerProps {
   urn: string | null;
@@ -41,10 +43,17 @@ export function ApsViewer({
   const onClickVersionsButtonRef = useRef<() => void>(() => {});
   onClickVersionsButtonRef.current = () => setShowCompareModal(true);
 
-  const onClickVersionsButton = useCallback(
-    () => onClickVersionsButtonRef.current(),
-    [],
-  );
+  const onClickVersionsButton = () => onClickVersionsButtonRef.current();
+
+  const onCloseCompareVersionModal = () => {
+    clearIsolateAndHighlight(viewerRef?.current);
+    const latestVersion = versions?.[0];
+    if (latestVersion) {
+      const encodedUrn = Buffer.from(latestVersion.id).toString("base64");
+      onVersionChange?.(encodedUrn, latestVersion.versionNumber);
+    }
+    setShowCompareModal(false);
+  };
 
   useEffect(() => {
     let cancelled = false;
@@ -123,7 +132,7 @@ export function ApsViewer({
           currentVersionNumber={currentVersionNumber}
           viewerRef={viewerRef}
           onVersionChange={onVersionChange}
-          onClose={() => setShowCompareModal(false)}
+          onClose={onCloseCompareVersionModal}
         />
       )}
     </Box>

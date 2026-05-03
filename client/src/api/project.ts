@@ -36,7 +36,6 @@ export interface ItemVersion {
   displayName?: string;
 }
 
-
 export interface BoundingBox {
   min: { x: number; y: number; z: number };
   max: { x: number; y: number; z: number };
@@ -57,6 +56,8 @@ export interface ModelElement {
   };
   boundingBox?: BoundingBox;
 }
+
+const SAVE_CHUNK_SIZE = 500;
 
 async function get<T>(path: string): Promise<T> {
   const res = await fetch(`${API_BASE}${path}`);
@@ -80,20 +81,35 @@ export const getItemVersions = (projectId: string, itemId: string) =>
   get<ItemVersion[]>(`/projects/${projectId}/items/${itemId}/versions`);
 
 export const fetchVersionElements = (itemId: string, versionNumber: number) =>
-  get<ModelElement[]>(`/models/${encodeURIComponent(itemId)}/versions/${versionNumber}/elements`);
+  get<ModelElement[]>(
+    `/models/${encodeURIComponent(itemId)}/versions/${versionNumber}/elements`,
+  );
 
 export async function saveVersionElements(
   itemId: string,
   versionNumber: number,
   elements: ModelElement[],
 ): Promise<void> {
-  const res = await fetch(
-    `${API_BASE}/models/${encodeURIComponent(itemId)}/versions/${versionNumber}/elements`,
-    {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(elements),
-    },
-  );
-  if (!res.ok) throw new Error(`Failed to save elements: ${res.status} ${res.statusText}`);
+  for (let i = 0; i < elements.length; i += SAVE_CHUNK_SIZE) {
+    const chunk = elements.slice(i, i + SAVE_CHUNK_SIZE);
+
+    const res = await fetch(
+      `${API_BASE}/models/${encodeURIComponent(itemId)}/versions/${versionNumber}/elements/chunks`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          chunkIndex: i / SAVE_CHUNK_SIZE,
+          isLastChunk: i + SAVE_CHUNK_SIZE >= elements.length,
+          elements: chunk,
+        }),
+      },
+    );
+
+    if (!res.ok) {
+      throw new Error(
+        `Failed to save elements chunk: ${res.status} ${res.statusText}`,
+      );
+    }
+  }
 }

@@ -29,3 +29,11 @@ export async function isolateAndHighlight(
   );
   viewer.fitToView([dbId]);
 }
+
+export async function clearIsolateAndHighlight(viewer: any) {
+  if (!viewer?.model) return;
+  viewer.isolate([], viewer.model);
+  viewer.clearThemingColors();
+  viewer.select([]);
+  viewer.fitToView();
+}
