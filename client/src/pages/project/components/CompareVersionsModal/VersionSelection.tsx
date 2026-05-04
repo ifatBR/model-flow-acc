@@ -45,6 +45,7 @@ export function VersionSelcection({
               </option>
             ))}
           </NativeSelect.Field>
+          <NativeSelect.Indicator />
         </NativeSelect.Root>
 
         <NativeSelect.Root flex={1} size="sm">
@@ -66,6 +67,7 @@ export function VersionSelcection({
               </option>
             ))}
           </NativeSelect.Field>
+          <NativeSelect.Indicator />
         </NativeSelect.Root>
       </Flex>
 

@@ -89,12 +89,7 @@ export function ViewerModal({
       <Portal>
         <Dialog.Backdrop />
         <Dialog.Positioner>
-          <Dialog.Content
-            h="90vh"
-            maxW="85%"
-            ms={`calc(${SPACING[5]} + ${isCollapsed ? SIDEBAR.widthCollapsed : SIDEBAR.widthExpanded})`}
-            bg={COLORS.bg.elevated}
-          >
+          <Dialog.Content h="90vh" maxW="85%" bg={COLORS.bg.elevated}>
             <Dialog.Header>
               <Flex w="100%" justify="space-between" pr={SPACING[6]}>
                 <Dialog.Title>{fileName}</Dialog.Title>

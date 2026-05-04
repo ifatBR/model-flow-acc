@@ -5,7 +5,13 @@ import type { ItemVersion, ModelElement } from "@/api/project";
 import { ensureSnapshot } from "@/utils/snapshotStore";
 import { runComparison } from "../../helpers/comparison.helper";
 import { isolateAndHighlight } from "../../helpers/viewer.helper";
-import { COLORS, RADII, SHADOWS, Z_INDEX } from "@/styles/designTokens";
+import {
+  COLORS,
+  RADII,
+  SHADOWS,
+  SPACING,
+  Z_INDEX,
+} from "@/styles/designTokens";
 import { DiffTabs } from "./DiffTabs";
 import { VersionSelcection } from "./VersionSelection";
 import { ConfirmBanner } from "./ConfirmBanner";
@@ -102,7 +108,12 @@ export function CompareVersionsModal({
     idMapRef.current = null;
     try {
       const viewName = currentViewName ?? undefined;
-      const earlierSnap = await ensureSnapshot(earlierUrn, itemId, earlier, viewName);
+      const earlierSnap = await ensureSnapshot(
+        earlierUrn,
+        itemId,
+        earlier,
+        viewName,
+      );
       const laterSnap = await ensureSnapshot(laterUrn, itemId, later, viewName);
 
       setResult(runComparison(earlierSnap.elements, laterSnap.elements));
@@ -182,8 +193,8 @@ export function CompareVersionsModal({
   return (
     <Flex
       position="absolute"
-      top="60px"
-      left="16px"
+      top={SPACING[8]}
+      left={SPACING[8]}
       zIndex={Z_INDEX.modal}
       w="340px"
       maxH="calc(100% - 80px)"

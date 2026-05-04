@@ -23,7 +23,7 @@ export function ViewsList({ views, defaultIndex, onLoadView }: ViewsListProps) {
         flex={1}
         size="sm"
         maxW="300px"
-        bg={COLORS.bg.surface}
+        bg={COLORS.bg.base}
         borderRadius={RADII.sm}
         ms={SPACING[2]}
       >
@@ -49,6 +49,7 @@ export function ViewsList({ views, defaultIndex, onLoadView }: ViewsListProps) {
             <option>Loading views...</option>
           )}
         </NativeSelect.Field>
+        <NativeSelect.Indicator />
       </NativeSelect.Root>
     </Flex>
   );
