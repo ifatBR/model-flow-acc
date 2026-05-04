@@ -6,12 +6,12 @@ import {
   ICON_SIZES,
   SPACING,
 } from "@/styles/designTokens";
-import { BodyText, Caption } from "@/components/Typography";
+import { BodyText } from "@/components/Typography";
 import { TriangleAlert } from "lucide-react";
 import { Tooltip } from "@/components/ui/tooltip";
 
 interface VersionBannerProps {
-  currentVersionNumber: number | null;
+  currentVersionNumber: number | undefined;
   otherVersionNum: number | null;
   isCurrentLatest: boolean;
   switchToVersion: (version: number) => void;

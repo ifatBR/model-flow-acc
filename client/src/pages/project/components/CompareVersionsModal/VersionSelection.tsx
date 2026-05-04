@@ -23,7 +23,7 @@ export function VersionSelcection({
   handleCompare,
 }: VersionSelcectionProps) {
   return (
-    <Box p={4}>
+    <Box p={SPACING[4]}>
       <Caption>Select two versions to compare</Caption>
       <Flex gap={SPACING[2]} my={SPACING[4]}>
         <NativeSelect.Root flex={1} size="sm">

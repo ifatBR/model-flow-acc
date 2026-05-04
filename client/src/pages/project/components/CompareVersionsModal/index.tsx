@@ -39,7 +39,7 @@ interface ConfirmState {
 export interface CompareVersionsModalProps {
   versions: ItemVersion[];
   itemId: string;
-  currentVersionNumber: number;
+  currentVersionNumber?: number;
   viewerRef: React.MutableRefObject<any>;
   onVersionChange: (urn: string, versionNumber: number) => void;
   onClose: () => void;
@@ -106,7 +106,7 @@ export function CompareVersionsModal({
       setLaterVersionNum(later);
       setEarlierVersionNum(earlier);
 
-      if (currentVersionNumber !== later) {
+      if (currentVersionNumber && currentVersionNumber !== later) {
         switchToVersion(later);
       }
     } finally {

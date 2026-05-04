@@ -3,36 +3,29 @@ import Fish from "./Fish";
 import { useEffect, useRef, useState } from "react";
 import { getAccessToken } from "@/api/auth";
 import { setupViewerToolbar } from "@/utils/viewer.utils";
-import { useLayout } from "@/context/LayoutContext";
-import { SIDEBAR } from "@/styles/designTokens";
-import { CompareVersionsModal } from "@/pages/project/components/CompareVersionsModal";
-import type { ItemVersion } from "@/api/project";
-import { clearIsolateAndHighlight } from "@/pages/project/helpers/viewer.helper";
-import { Buffer } from "buffer";
 
 interface ApsViewerProps {
   urn: string | null;
+  viewerRef: any;
+  viewerDocRef: any;
   setIsLoading: (val: boolean) => void;
-  versions?: ItemVersion[];
-  itemId?: string | null;
-  currentVersionNumber?: number;
-  onVersionChange?: (urn: string, versionNumber: number) => void;
+  setShowCompareModal: (val: boolean) => void;
+  setDefaultViewIndex: (idx: number) => void;
+  setViews: (views: any) => void;
 }
 
 export function ApsViewer({
   urn,
+  viewerRef,
+  viewerDocRef,
   setIsLoading,
-  versions,
-  itemId,
-  currentVersionNumber = 0,
-  onVersionChange,
+  setShowCompareModal,
+  setDefaultViewIndex,
+  setViews,
 }: ApsViewerProps) {
   const [showFish, setShowFish] = useState<boolean>(false);
-  const [showCompareModal, setShowCompareModal] = useState(false);
-  const { isCollapsed } = useLayout();
 
   const containerRef = useRef<HTMLDivElement | null>(null);
-  const viewerRef = useRef<any>(null);
   const toolbarCleanupRef = useRef<(() => void) | null>(null);
 
   const onClickFishBtn = () => {
@@ -44,16 +37,6 @@ export function ApsViewer({
   onClickVersionsButtonRef.current = () => setShowCompareModal(true);
 
   const onClickVersionsButton = () => onClickVersionsButtonRef.current();
-
-  const onCloseCompareVersionModal = () => {
-    clearIsolateAndHighlight(viewerRef?.current);
-    const latestVersion = versions?.[0];
-    if (latestVersion) {
-      const encodedUrn = Buffer.from(latestVersion.id).toString("base64");
-      onVersionChange?.(encodedUrn, latestVersion.versionNumber);
-    }
-    setShowCompareModal(false);
-  };
 
   useEffect(() => {
     let cancelled = false;
@@ -85,6 +68,22 @@ export function ApsViewer({
           (doc: any) => {
             const defaultModel = doc.getRoot().getDefaultGeometry();
             viewer.loadDocumentNode(doc, defaultModel);
+
+            const root = doc.getRoot();
+
+            const viewables = root.search({
+              type: "geometry",
+            });
+            const views3d = viewables.filter((v: any) => v.data.role === "3d");
+            const views2d = viewables.filter((v: any) => v.data.role === "2d");
+            const allViews = [...views3d, ...views2d];
+            viewerDocRef.current = doc;
+            setViews(allViews);
+            setDefaultViewIndex(
+              allViews.findIndex(
+                (v) => v.data.guide === defaultModel.data.guide,
+              ),
+            );
           },
           (errCode: number, errMsg: string) => {
             console.error("Viewer load error:", errCode, errMsg);
@@ -109,31 +108,13 @@ export function ApsViewer({
     };
   }, [urn]);
 
-  const hasVersions = versions && versions.length > 1 && itemId;
-
   return (
-    <Box
-      w={`calc(100% - ${isCollapsed ? SIDEBAR.widthCollapsed : SIDEBAR.widthExpanded})`}
-      h="100%"
-      position="absolute"
-    >
-      <Box ref={containerRef} position="absolute" w="100%" h="100%" />
-
+    <Box w="100%" maxW="100%" h="100%" position="relative">
+      <Box ref={containerRef} w="100%" maxW="100%" h="100%" />
       {showFish && (
-        <Box position="absolute" zIndex="2" bottom="70px" ml="30%" w={"40%"}>
+        <Box position="absolute" zIndex="2" bottom="70px" ml="30%" w="40%">
           <Fish setPlay={setShowFish} />
         </Box>
-      )}
-
-      {showCompareModal && hasVersions && onVersionChange && (
-        <CompareVersionsModal
-          versions={versions}
-          itemId={itemId}
-          currentVersionNumber={currentVersionNumber}
-          viewerRef={viewerRef}
-          onVersionChange={onVersionChange}
-          onClose={onCloseCompareVersionModal}
-        />
       )}
     </Box>
   );
