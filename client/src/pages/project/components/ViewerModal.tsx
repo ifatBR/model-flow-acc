@@ -6,9 +6,11 @@ import type { ItemVersion } from "@/api/project";
 import { CompareVersionsModal } from "./CompareVersionsModal";
 import { clearIsolateAndHighlight } from "../helpers/viewer.helper";
 import { Buffer } from "buffer";
-import { COLORS, SIDEBAR, SPACING } from "@/styles/designTokens";
-import { ViewsList } from "./CompareVersionsModal/ViewsList";
+import { COLORS, SPACING } from "@/styles/designTokens";
+import { ViewsList } from "./ViewsList";
 import { useLayout } from "@/context/LayoutContext";
+import { PropertiesModal } from "./PropertiesModal";
+import type { SelectedElementData } from "./PropertiesModal";
 
 interface ViewerModalProps {
   fileName: string | null;
@@ -20,6 +22,60 @@ interface ViewerModalProps {
   onVersionChange?: (urn: string, versionNumber: number) => void;
 }
 
+function findProp(props: any[], ...names: string[]): string | undefined {
+  for (const name of names) {
+    const match = props.find(
+      (p: any) => p.displayName?.toLowerCase() === name.toLowerCase(),
+    );
+    if (
+      match &&
+      match.displayValue !== null &&
+      match.displayValue !== undefined &&
+      match.displayValue !== ""
+    ) {
+      return String(match.displayValue);
+    }
+  }
+  return undefined;
+}
+
+function parseViewerElement(result: any): SelectedElementData {
+  const props: any[] = result.properties ?? [];
+  return {
+    properties: {
+      category: findProp(props, "Category"),
+      name: findProp(props, "Type Name", "Family and Type", "Family Name"),
+      level: findProp(
+        props,
+        "Level",
+        "Base Level",
+        "Base Constraint",
+        "Reference Level",
+        "Schedule Level",
+      ),
+      material: findProp(
+        props,
+        "Structural Material",
+        "Material",
+        "Top Material",
+      ),
+      length: findProp(props, "Length"),
+      area: findProp(props, "Area"),
+      height: findProp(props, "Height", "Unconnected Height", "Rough Height"),
+      thickness: findProp(props, "Thickness"),
+      width: findProp(props, "Width", "Rough Width"),
+      diameter: findProp(props, "Outer Diameter", "Diameter"),
+      slope: findProp(props, "Slope"),
+      insulation: findProp(
+        props,
+        "Insulation Thickness",
+        "Insulation Type",
+        "Insulation Lining Thickness",
+      ),
+    },
+  };
+}
+
 export function ViewerModal({
   fileName,
   browseUrn,
@@ -29,10 +85,13 @@ export function ViewerModal({
   currentVersionNumber,
   onVersionChange,
 }: ViewerModalProps) {
-  const { isCollapsed } = useLayout();
+  useLayout();
 
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [showCompareModal, setShowCompareModal] = useState(false);
+  const [showPropertiesModal, setShowPropertiesModal] = useState(false);
+  const [selectedElement, setSelectedElement] =
+    useState<SelectedElementData | null>(null);
   const [selectedViewIndex, setSelectedViewIndex] = useState<number>(-1);
   const [views, setViews] = useState<any[]>([]);
   const [currentViewName, setCurrentViewName] = useState<string | null>(null);
@@ -63,14 +122,33 @@ export function ViewerModal({
     setShowCompareModal(false);
   };
 
-  const onLoadView = (index: number) => {
+  const onCloseViewerModal = () => {
+    currentViewNameRef.current = null;
+    setCurrentViewName(null);
+    setShowPropertiesModal(false);
+    setViews([]);
+    setSelectedViewIndex(-1);
+    setUrn(null);
+  };
+
+  const onLoadView = async (index: number) => {
     const view = views[index];
     viewerRef?.current?.loadDocumentNode(viewerDocRef.current, view);
+
     setCurrentViewName(view.data.name);
     currentViewNameRef.current = view.data.name;
     versionsButtonRef.current?.(view.data.role === "3d");
     setShowCompareModal(false);
   };
+
+  const onRawElementSelected = (rawResult: any | null) => {
+    if (rawResult === null) {
+      setSelectedElement(null);
+      return;
+    }
+    setSelectedElement(parseViewerElement(rawResult));
+  };
+
   return isLoading ? (
     <Loader />
   ) : (
@@ -78,11 +156,7 @@ export function ViewerModal({
       open={!!browseUrn && !isLoading}
       onOpenChange={({ open }) => {
         if (!open) {
-          currentViewNameRef.current = null;
-          setCurrentViewName(null);
-          setViews([]);
-          setSelectedViewIndex(-1);
-          setUrn(null);
+          onCloseViewerModal();
         }
       }}
     >
@@ -112,6 +186,8 @@ export function ViewerModal({
                 versionsButtonRef={versionsButtonRef}
                 currentViewNameRef={currentViewNameRef}
                 setShowCompareModal={setShowCompareModal}
+                setShowPropertiesModal={setShowPropertiesModal}
+                onRawElementSelected={onRawElementSelected}
                 setSelectedViewIndex={setSelectedViewIndex}
                 setViews={setViews}
               />
@@ -124,6 +200,12 @@ export function ViewerModal({
                   viewerRef={viewerRef}
                   onVersionChange={onVersionChange}
                   onClose={onCloseCompareVersionModal}
+                />
+              )}
+              {showPropertiesModal && selectedElement && (
+                <PropertiesModal
+                  element={selectedElement}
+                  onClose={() => setShowPropertiesModal(false)}
                 />
               )}
             </Dialog.Body>

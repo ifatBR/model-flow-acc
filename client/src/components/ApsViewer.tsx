@@ -2,7 +2,7 @@ import { Box } from "@chakra-ui/react";
 import Fish from "./Fish";
 import { useEffect, useRef, useState } from "react";
 import { getAccessToken } from "@/api/auth";
-import { setupViewerToolbar } from "@/utils/viewer.utils";
+import { removeBuiltInButtons, setupViewerToolbar } from "@/utils/viewer.utils";
 
 interface ApsViewerProps {
   urn: string | null;
@@ -12,6 +12,8 @@ interface ApsViewerProps {
   currentViewNameRef: { current: string | null };
   setIsLoading: (val: boolean) => void;
   setShowCompareModal: (val: boolean) => void;
+  setShowPropertiesModal: (val: boolean) => void;
+  onRawElementSelected: (rawResult: any | null) => void;
   setSelectedViewIndex: (idx: number) => void;
   setViews: (views: any) => void;
 }
@@ -24,6 +26,8 @@ export function ApsViewer({
   currentViewNameRef,
   setIsLoading,
   setShowCompareModal,
+  setShowPropertiesModal,
+  onRawElementSelected,
   setSelectedViewIndex,
   setViews,
 }: ApsViewerProps) {
@@ -31,16 +35,21 @@ export function ApsViewer({
 
   const containerRef = useRef<HTMLDivElement | null>(null);
   const toolbarCleanupRef = useRef<(() => void) | null>(null);
+  const setPropertiesEnabledRef = useRef<((enabled: boolean) => void) | null>(
+    null,
+  );
 
   const onClickFishBtn = () => {
     setShowFish(true);
   };
 
-  // Use a ref so the toolbar closure always calls the latest handler
   const onClickVersionsButtonRef = useRef<() => void>(() => {});
   onClickVersionsButtonRef.current = () => setShowCompareModal(true);
-
   const onClickVersionsButton = () => onClickVersionsButtonRef.current();
+
+  const onClickPropertiesButtonRef = useRef<() => void>(() => {});
+  onClickPropertiesButtonRef.current = () => setShowPropertiesModal(true);
+  const onClickPropertiesButton = () => onClickPropertiesButtonRef.current();
 
   useEffect(() => {
     let cancelled = false;
@@ -59,13 +68,39 @@ export function ApsViewer({
         if (!viewer) return;
         viewer.start();
 
-        const { cleanup, setVersionsEnabled } = setupViewerToolbar(
-          viewer,
-          onClickVersionsButton,
-          onClickFishBtn,
-        );
+        const { cleanup, setVersionsEnabled, setPropertiesEnabled } =
+          setupViewerToolbar(
+            viewer,
+            onClickVersionsButton,
+            onClickFishBtn,
+            onClickPropertiesButton,
+          );
         toolbarCleanupRef.current = cleanup;
         versionsButtonRef.current = setVersionsEnabled;
+        setPropertiesEnabledRef.current = setPropertiesEnabled;
+
+        viewer.addEventListener(
+          window.Autodesk.Viewing.SELECTION_CHANGED_EVENT,
+          (event: any) => {
+            const dbIds: number[] = event.dbIdArray ?? [];
+            if (dbIds.length === 0) {
+              setPropertiesEnabledRef.current?.(false);
+              onRawElementSelected(null);
+              return;
+            }
+            setPropertiesEnabledRef.current?.(true);
+            viewer.getProperties(dbIds[0], (result: any) => {
+              onRawElementSelected(result);
+            });
+          },
+        );
+
+        viewer.addEventListener(Autodesk.Viewing.TOOLBAR_CREATED_EVENT, () => {
+          removeBuiltInButtons(viewer);
+
+          // some controls are added slightly later
+          setTimeout(() => removeBuiltInButtons(viewer), 500);
+        });
 
         setIsLoading(false);
 

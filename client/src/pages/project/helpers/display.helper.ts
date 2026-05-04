@@ -1,5 +1,17 @@
 import type { PropertyChange } from "../components/CompareVersionsModal";
 
+export function getElementDisplayName(properties: {
+  category?: string;
+  name?: string;
+  level?: string;
+}): string {
+  const { category, name, level } = properties;
+  const cat = category ?? "Unknown";
+  const lvl = level ? ` (${level})` : "";
+  if (name) return `${cat} ${name}${lvl}`;
+  return `${cat}${lvl}`;
+}
+
 export function parseNumericValue(val: unknown): number | null {
   if (typeof val !== "string") return null;
   const match = val.match(/[\d.]+/);

@@ -3,7 +3,10 @@ import { BodyText, ListText } from "../../../../components/Typography";
 import type { ListElement } from ".";
 import { Box } from "@chakra-ui/react";
 import { COLORS, SPACING } from "@/styles/designTokens";
-import { getChangeDescription } from "../../helpers/display.helper";
+import {
+  getChangeDescription,
+  getElementDisplayName,
+} from "../../helpers/display.helper";
 
 interface TabItemListProps {
   items: ListElement[];
@@ -19,14 +22,6 @@ export function TabItemList({
   emptyListMsg,
   handleItemClick,
 }: TabItemListProps) {
-  function getElementDisplayName(elem: ModelElement): string {
-    const { category, name, level } = elem.properties;
-    const cat = category ?? "Unknown";
-    const lvl = level ? ` (${level})` : "";
-    if (name) return `${cat} ${name}${lvl}`;
-    return `${cat}${lvl}`;
-  }
-
   return (
     <Box>
       {items.length === 0 ? (
@@ -45,7 +40,7 @@ export function TabItemList({
             onClick={() => handleItemClick(element)}
           >
             <ListText color={color}>
-              {icon} {getElementDisplayName(element)}
+              {icon} {getElementDisplayName(element.properties)}
             </ListText>
             {element?.changes?.map((change, i) => (
               <ListText key={i} color={COLORS.text.secondary}>
