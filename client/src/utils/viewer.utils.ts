@@ -2,7 +2,7 @@ export function setupViewerToolbar(
   viewer: Autodesk.Viewing.GuiViewer3D,
   onClickVersionsButton: () => void,
   onClickFishBtn: () => void,
-) {
+): { cleanup: () => void; setVersionsEnabled: (enabled: boolean) => void } {
   const fishButton = new window.Autodesk.Viewing.UI.Button("fish-button");
   fishButton.setToolTip("Fish");
 
@@ -16,7 +16,20 @@ export function setupViewerToolbar(
   versionsButton.setToolTip("Compare Versions");
 
   versionsButton.onClick = () => {
-    onClickVersionsButton();
+    if (
+      versionsButton.getState() !==
+      window.Autodesk.Viewing.UI.Button.State.DISABLED
+    ) {
+      onClickVersionsButton();
+    }
+  };
+
+  const setVersionsEnabled = (enabled: boolean) => {
+    versionsButton.setState(
+      enabled
+        ? window.Autodesk.Viewing.UI.Button.State.INACTIVE
+        : window.Autodesk.Viewing.UI.Button.State.DISABLED,
+    );
   };
 
   const group = new window.Autodesk.Viewing.UI.ControlGroup("demo-group");
@@ -38,16 +51,18 @@ export function setupViewerToolbar(
     );
   }
 
-  //The returned cleanup function that we can run later in the useEffect return.
-  return () => {
-    viewer.removeEventListener(
-      window.Autodesk.Viewing.TOOLBAR_CREATED_EVENT,
-      addToolbar,
-    );
+  return {
+    setVersionsEnabled,
+    cleanup: () => {
+      viewer.removeEventListener(
+        window.Autodesk.Viewing.TOOLBAR_CREATED_EVENT,
+        addToolbar,
+      );
 
-    const existingGroup = viewer.toolbar?.getControl("my-custom-group");
-    if (existingGroup) {
-      viewer.toolbar.removeControl(existingGroup);
-    }
+      const existingGroup = viewer.toolbar?.getControl("my-custom-group");
+      if (existingGroup) {
+        viewer.toolbar.removeControl(existingGroup);
+      }
+    },
   };
 }

@@ -40,6 +40,7 @@ export interface CompareVersionsModalProps {
   versions: ItemVersion[];
   itemId: string;
   currentVersionNumber?: number;
+  currentViewName: string | null;
   viewerRef: React.MutableRefObject<any>;
   onVersionChange: (urn: string, versionNumber: number) => void;
   onClose: () => void;
@@ -51,6 +52,7 @@ export function CompareVersionsModal({
   versions,
   itemId,
   currentVersionNumber,
+  currentViewName,
   viewerRef,
   onVersionChange,
   onClose,
@@ -99,8 +101,9 @@ export function CompareVersionsModal({
     setComparing(true);
     idMapRef.current = null;
     try {
-      const earlierSnap = await ensureSnapshot(earlierUrn, itemId, earlier);
-      const laterSnap = await ensureSnapshot(laterUrn, itemId, later);
+      const viewName = currentViewName ?? undefined;
+      const earlierSnap = await ensureSnapshot(earlierUrn, itemId, earlier, viewName);
+      const laterSnap = await ensureSnapshot(laterUrn, itemId, later, viewName);
 
       setResult(runComparison(earlierSnap.elements, laterSnap.elements));
       setLaterVersionNum(later);

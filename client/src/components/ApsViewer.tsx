@@ -8,9 +8,11 @@ interface ApsViewerProps {
   urn: string | null;
   viewerRef: any;
   viewerDocRef: any;
+  versionsButtonRef: React.RefObject<((enabled: boolean) => void) | null>;
+  currentViewNameRef: { current: string | null };
   setIsLoading: (val: boolean) => void;
   setShowCompareModal: (val: boolean) => void;
-  setDefaultViewIndex: (idx: number) => void;
+  setSelectedViewIndex: (idx: number) => void;
   setViews: (views: any) => void;
 }
 
@@ -18,9 +20,11 @@ export function ApsViewer({
   urn,
   viewerRef,
   viewerDocRef,
+  versionsButtonRef,
+  currentViewNameRef,
   setIsLoading,
   setShowCompareModal,
-  setDefaultViewIndex,
+  setSelectedViewIndex,
   setViews,
 }: ApsViewerProps) {
   const [showFish, setShowFish] = useState<boolean>(false);
@@ -55,35 +59,36 @@ export function ApsViewer({
         if (!viewer) return;
         viewer.start();
 
-        toolbarCleanupRef.current = setupViewerToolbar(
+        const { cleanup, setVersionsEnabled } = setupViewerToolbar(
           viewer,
           onClickVersionsButton,
           onClickFishBtn,
         );
+        toolbarCleanupRef.current = cleanup;
+        versionsButtonRef.current = setVersionsEnabled;
 
         setIsLoading(false);
 
         window.Autodesk.Viewing.Document.load(
           `urn:${urn}`,
           (doc: any) => {
-            const defaultModel = doc.getRoot().getDefaultGeometry();
-            viewer.loadDocumentNode(doc, defaultModel);
-
             const root = doc.getRoot();
-
-            const viewables = root.search({
-              type: "geometry",
-            });
+            const viewables = root.search({ type: "geometry" });
             const views3d = viewables.filter((v: any) => v.data.role === "3d");
             const views2d = viewables.filter((v: any) => v.data.role === "2d");
             const allViews = [...views3d, ...views2d];
+
+            const defaultModel = root.getDefaultGeometry();
+            const restoredView = currentViewNameRef.current
+              ? (views3d.find(
+                  (v: any) => v.data.name === currentViewNameRef.current,
+                ) ?? defaultModel)
+              : defaultModel;
+
+            viewer.loadDocumentNode(doc, restoredView);
             viewerDocRef.current = doc;
             setViews(allViews);
-            setDefaultViewIndex(
-              allViews.findIndex(
-                (v) => v.data.guide === defaultModel.data.guide,
-              ),
-            );
+            setSelectedViewIndex(allViews.indexOf(restoredView));
           },
           (errCode: number, errMsg: string) => {
             console.error("Viewer load error:", errCode, errMsg);

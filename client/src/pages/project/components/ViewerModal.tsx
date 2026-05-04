@@ -1,7 +1,7 @@
 import { ApsViewer } from "@/components/ApsViewer";
 import { Loader } from "@/components/Loader";
 import { CloseButton, Dialog, Flex, Portal } from "@chakra-ui/react";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import type { ItemVersion } from "@/api/project";
 import { CompareVersionsModal } from "./CompareVersionsModal";
 import { clearIsolateAndHighlight } from "../helpers/viewer.helper";
@@ -33,13 +33,25 @@ export function ViewerModal({
 
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [showCompareModal, setShowCompareModal] = useState(false);
-  const [defaultViewIndex, setDefaultViewIndex] = useState<number>(-1);
+  const [selectedViewIndex, setSelectedViewIndex] = useState<number>(-1);
   const [views, setViews] = useState<any[]>([]);
+  const [currentViewName, setCurrentViewName] = useState<string | null>(null);
 
   const viewerRef = useRef<any>(null);
   const viewerDocRef = useRef<any>(null);
+  const versionsButtonRef = useRef<((enabled: boolean) => void) | null>(null);
+  const currentViewNameRef = useRef<string | null>(null);
 
   const hasVersions = versions && versions.length > 1 && itemId;
+
+  useEffect(() => {
+    if (selectedViewIndex >= 0 && views.length > 0) {
+      const view = views[selectedViewIndex];
+      setCurrentViewName(view.data.name);
+      currentViewNameRef.current = view.data.name;
+      versionsButtonRef.current?.(view.data.role === "3d");
+    }
+  }, [selectedViewIndex, views]);
 
   const onCloseCompareVersionModal = () => {
     clearIsolateAndHighlight(viewerRef?.current);
@@ -52,7 +64,12 @@ export function ViewerModal({
   };
 
   const onLoadView = (index: number) => {
-    viewerRef?.current?.loadDocumentNode(viewerDocRef.current, views[index]);
+    const view = views[index];
+    viewerRef?.current?.loadDocumentNode(viewerDocRef.current, view);
+    setCurrentViewName(view.data.name);
+    currentViewNameRef.current = view.data.name;
+    versionsButtonRef.current?.(view.data.role === "3d");
+    setShowCompareModal(false);
   };
   return isLoading ? (
     <Loader />
@@ -61,6 +78,10 @@ export function ViewerModal({
       open={!!browseUrn && !isLoading}
       onOpenChange={({ open }) => {
         if (!open) {
+          currentViewNameRef.current = null;
+          setCurrentViewName(null);
+          setViews([]);
+          setSelectedViewIndex(-1);
           setUrn(null);
         }
       }}
@@ -79,7 +100,7 @@ export function ViewerModal({
                 <Dialog.Title>{fileName}</Dialog.Title>
                 <ViewsList
                   views={views}
-                  defaultIndex={defaultViewIndex}
+                  defaultIndex={selectedViewIndex}
                   onLoadView={onLoadView}
                 />
               </Flex>
@@ -93,8 +114,10 @@ export function ViewerModal({
                 setIsLoading={setIsLoading}
                 viewerRef={viewerRef}
                 viewerDocRef={viewerDocRef}
+                versionsButtonRef={versionsButtonRef}
+                currentViewNameRef={currentViewNameRef}
                 setShowCompareModal={setShowCompareModal}
-                setDefaultViewIndex={setDefaultViewIndex}
+                setSelectedViewIndex={setSelectedViewIndex}
                 setViews={setViews}
               />
               {showCompareModal && hasVersions && onVersionChange && (
@@ -102,6 +125,7 @@ export function ViewerModal({
                   versions={versions}
                   itemId={itemId}
                   currentVersionNumber={currentVersionNumber}
+                  currentViewName={currentViewName}
                   viewerRef={viewerRef}
                   onVersionChange={onVersionChange}
                   onClose={onCloseCompareVersionModal}

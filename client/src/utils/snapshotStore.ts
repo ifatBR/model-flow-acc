@@ -132,7 +132,10 @@ async function extractElements(viewer: any): Promise<ModelElement[]> {
   return mapResultsToElements(results, extIdMap);
 }
 
-async function extractFromViewer(urn: string): Promise<ModelElement[]> {
+async function extractFromViewer(
+  urn: string,
+  viewName?: string,
+): Promise<ModelElement[]> {
   const container = document.createElement("div");
 
   container.style.cssText =
@@ -187,8 +190,15 @@ async function extractFromViewer(urn: string): Promise<ModelElement[]> {
         window.Autodesk.Viewing.Document.load(
           `urn:${urn}`,
           (doc: any) => {
-            const defaultGeom = doc.getRoot().getDefaultGeometry();
-            viewer.loadDocumentNode(doc, defaultGeom);
+            const root = doc.getRoot();
+            let geom = root.getDefaultGeometry();
+            if (viewName) {
+              const match = root
+                .search({ type: "geometry", role: "3d" })
+                .find((v: any) => v.data.name === viewName);
+              if (match) geom = match;
+            }
+            viewer.loadDocumentNode(doc, geom);
           },
           (errCode: number, errMsg: string) => {
             cleanup();
@@ -210,24 +220,29 @@ export async function ensureSnapshot(
   urn: string,
   itemId: string,
   versionNumber: number,
+  viewName?: string,
 ): Promise<Snapshot> {
-  const cached = cache.get(urn);
+  const cacheKey = viewName ? `${urn}:${viewName}` : urn;
+  const cached = cache.get(cacheKey);
   if (cached) return cached;
 
-  const serverElements = await fetchVersionElements(itemId, versionNumber);
-
-  if (serverElements.length > 0) {
-    const snapshot = { urn, elements: serverElements };
-    cache.set(urn, snapshot);
-    return snapshot;
+  // Server elements are full-model snapshots; skip them when scoping to a view.
+  if (!viewName) {
+    const serverElements = await fetchVersionElements(itemId, versionNumber);
+    if (serverElements.length > 0) {
+      const snapshot = { urn, elements: serverElements };
+      cache.set(cacheKey, snapshot);
+      return snapshot;
+    }
   }
 
-  const elements = await extractFromViewer(urn);
+  const elements = await extractFromViewer(urn, viewName);
 
-  await saveVersionElements(itemId, versionNumber, elements);
+  if (!viewName) {
+    await saveVersionElements(itemId, versionNumber, elements);
+  }
 
   const snapshot = { urn, elements };
-  cache.set(urn, snapshot);
-
+  cache.set(cacheKey, snapshot);
   return snapshot;
 }
