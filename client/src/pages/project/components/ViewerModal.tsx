@@ -1,16 +1,20 @@
 import { ApsViewer } from "@/components/ApsViewer";
 import { Loader } from "@/components/Loader";
 import { CloseButton, Dialog, Flex, Portal } from "@chakra-ui/react";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import type { ItemVersion } from "@/api/project";
 import { CompareVersionsModal } from "./CompareVersionsModal";
-import { clearIsolateAndHighlight } from "../helpers/viewer.helper";
+import { VersionsModal } from "./VersionsModal";
+import {
+  clearIsolateAndHighlight,
+  parseViewerElement,
+} from "../helpers/viewer.helper";
 import { Buffer } from "buffer";
 import { COLORS, SPACING } from "@/styles/designTokens";
 import { ViewsList } from "./ViewsList";
 import { useLayout } from "@/context/LayoutContext";
 import { PropertiesModal } from "./PropertiesModal";
-import type { SelectedElementData } from "./PropertiesModal";
+import { useViewerModal } from "@/context/ViewerModal.context.";
 
 interface ViewerModalProps {
   fileName: string | null;
@@ -20,60 +24,6 @@ interface ViewerModalProps {
   itemId?: string | null;
   currentVersionNumber?: number;
   onVersionChange?: (urn: string, versionNumber: number) => void;
-}
-
-function findProp(props: any[], ...names: string[]): string | undefined {
-  for (const name of names) {
-    const match = props.find(
-      (p: any) => p.displayName?.toLowerCase() === name.toLowerCase(),
-    );
-    if (
-      match &&
-      match.displayValue !== null &&
-      match.displayValue !== undefined &&
-      match.displayValue !== ""
-    ) {
-      return String(match.displayValue);
-    }
-  }
-  return undefined;
-}
-
-function parseViewerElement(result: any): SelectedElementData {
-  const props: any[] = result.properties ?? [];
-  return {
-    properties: {
-      category: findProp(props, "Category"),
-      name: findProp(props, "Type Name", "Family and Type", "Family Name"),
-      level: findProp(
-        props,
-        "Level",
-        "Base Level",
-        "Base Constraint",
-        "Reference Level",
-        "Schedule Level",
-      ),
-      material: findProp(
-        props,
-        "Structural Material",
-        "Material",
-        "Top Material",
-      ),
-      length: findProp(props, "Length"),
-      area: findProp(props, "Area"),
-      height: findProp(props, "Height", "Unconnected Height", "Rough Height"),
-      thickness: findProp(props, "Thickness"),
-      width: findProp(props, "Width", "Rough Width"),
-      diameter: findProp(props, "Outer Diameter", "Diameter"),
-      slope: findProp(props, "Slope"),
-      insulation: findProp(
-        props,
-        "Insulation Thickness",
-        "Insulation Type",
-        "Insulation Lining Thickness",
-      ),
-    },
-  };
 }
 
 export function ViewerModal({
@@ -86,20 +36,28 @@ export function ViewerModal({
   onVersionChange,
 }: ViewerModalProps) {
   useLayout();
+  const {
+    showCompareModal,
+    setShowCompareModal,
+    showVersionsModal,
+    setShowVersionsModal,
+    showPropertiesModal,
+    setShowPropertiesModal,
+    selectedElement,
+    setSelectedElement,
+    selectedViewIndex,
+    setSelectedViewIndex,
+    views,
+    setViews,
+    currentViewName,
+    setCurrentViewName,
+    viewerRef,
+    viewerDocRef,
+    versionsButtonRef,
+    currentViewNameRef,
+  } = useViewerModal();
 
   const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [showCompareModal, setShowCompareModal] = useState(false);
-  const [showPropertiesModal, setShowPropertiesModal] = useState(false);
-  const [selectedElement, setSelectedElement] =
-    useState<SelectedElementData | null>(null);
-  const [selectedViewIndex, setSelectedViewIndex] = useState<number>(-1);
-  const [views, setViews] = useState<any[]>([]);
-  const [currentViewName, setCurrentViewName] = useState<string | null>(null);
-
-  const viewerRef = useRef<any>(null);
-  const viewerDocRef = useRef<any>(null);
-  const versionsButtonRef = useRef<((enabled: boolean) => void) | null>(null);
-  const currentViewNameRef = useRef<string | null>(null);
 
   const hasVersions = versions && versions.length > 1 && itemId;
 
@@ -149,6 +107,15 @@ export function ViewerModal({
     setSelectedElement(parseViewerElement(rawResult));
   };
 
+  const onSelectVersion = (versionNumber: number) => {
+    const target = versions?.find((v) => v.versionNumber === versionNumber);
+    if (target) {
+      const encodedUrn = Buffer.from(target.id).toString("base64");
+      onVersionChange?.(encodedUrn, versionNumber);
+    }
+    setShowVersionsModal(false);
+  };
+
   return isLoading ? (
     <Loader />
   ) : (
@@ -181,16 +148,16 @@ export function ViewerModal({
               <ApsViewer
                 urn={browseUrn}
                 setIsLoading={setIsLoading}
-                viewerRef={viewerRef}
-                viewerDocRef={viewerDocRef}
-                versionsButtonRef={versionsButtonRef}
-                currentViewNameRef={currentViewNameRef}
-                setShowCompareModal={setShowCompareModal}
-                setShowPropertiesModal={setShowPropertiesModal}
                 onRawElementSelected={onRawElementSelected}
-                setSelectedViewIndex={setSelectedViewIndex}
-                setViews={setViews}
               />
+              {showVersionsModal && hasVersions && onVersionChange && (
+                <VersionsModal
+                  versions={versions}
+                  currentVersionNumber={currentVersionNumber}
+                  onSelectVersion={onSelectVersion}
+                  onClose={() => setShowVersionsModal(false)}
+                />
+              )}
               {showCompareModal && hasVersions && onVersionChange && (
                 <CompareVersionsModal
                   versions={versions}
@@ -199,6 +166,7 @@ export function ViewerModal({
                   currentViewName={currentViewName}
                   viewerRef={viewerRef}
                   onVersionChange={onVersionChange}
+                  onClosePropertiesModal={() => setShowPropertiesModal(false)}
                   onClose={onCloseCompareVersionModal}
                 />
               )}

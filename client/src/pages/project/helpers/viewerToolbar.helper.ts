@@ -1,6 +1,7 @@
 export function setupViewerToolbar(
   viewer: Autodesk.Viewing.GuiViewer3D,
   onClickVersionsButton: () => void,
+  onClickVersionsListButton: () => void,
   onClickFishBtn: () => void,
   onClickPropertiesButton: () => void,
 ): {
@@ -25,6 +26,14 @@ export function setupViewerToolbar(
     ) {
       onClickVersionsButton();
     }
+  };
+
+  const versionsListButton = new window.Autodesk.Viewing.UI.Button(
+    "versions-list-button",
+  );
+  versionsListButton.setToolTip("Version List");
+  versionsListButton.onClick = () => {
+    onClickVersionsListButton();
   };
 
   const propertiesButton = new window.Autodesk.Viewing.UI.Button(
@@ -60,6 +69,7 @@ export function setupViewerToolbar(
   const group = new window.Autodesk.Viewing.UI.ControlGroup("demo-group");
   group.addControl(fishButton);
   group.addControl(versionsButton);
+  group.addControl(versionsListButton);
   group.addControl(propertiesButton);
 
   const addToolbar = () => {

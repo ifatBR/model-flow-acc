@@ -2,35 +2,34 @@ import { Box } from "@chakra-ui/react";
 import Fish from "./Fish";
 import { useEffect, useRef, useState } from "react";
 import { getAccessToken } from "@/api/auth";
-import { removeBuiltInButtons, setupViewerToolbar } from "@/utils/viewer.utils";
+import {
+  removeBuiltInButtons,
+  setupViewerToolbar,
+} from "@/pages/project/helpers/viewerToolbar.helper";
+import { useViewerModal } from "@/context/ViewerModal.context.";
 
 interface ApsViewerProps {
   urn: string | null;
-  viewerRef: any;
-  viewerDocRef: any;
-  versionsButtonRef: React.RefObject<((enabled: boolean) => void) | null>;
-  currentViewNameRef: { current: string | null };
   setIsLoading: (val: boolean) => void;
-  setShowCompareModal: (val: boolean) => void;
-  setShowPropertiesModal: (val: boolean) => void;
   onRawElementSelected: (rawResult: any | null) => void;
-  setSelectedViewIndex: (idx: number) => void;
-  setViews: (views: any) => void;
 }
 
 export function ApsViewer({
   urn,
-  viewerRef,
-  viewerDocRef,
-  versionsButtonRef,
-  currentViewNameRef,
   setIsLoading,
-  setShowCompareModal,
-  setShowPropertiesModal,
   onRawElementSelected,
-  setSelectedViewIndex,
-  setViews,
 }: ApsViewerProps) {
+  const {
+    viewerRef,
+    viewerDocRef,
+    versionsButtonRef,
+    currentViewNameRef,
+    setShowCompareModal,
+    setShowVersionsModal,
+    setShowPropertiesModal,
+    setSelectedViewIndex,
+    setViews,
+  } = useViewerModal();
   const [showFish, setShowFish] = useState<boolean>(false);
 
   const containerRef = useRef<HTMLDivElement | null>(null);
@@ -46,6 +45,11 @@ export function ApsViewer({
   const onClickVersionsButtonRef = useRef<() => void>(() => {});
   onClickVersionsButtonRef.current = () => setShowCompareModal(true);
   const onClickVersionsButton = () => onClickVersionsButtonRef.current();
+
+  const onClickVersionsListButtonRef = useRef<() => void>(() => {});
+  onClickVersionsListButtonRef.current = () => setShowVersionsModal(true);
+  const onClickVersionsListButton = () =>
+    onClickVersionsListButtonRef.current();
 
   const onClickPropertiesButtonRef = useRef<() => void>(() => {});
   onClickPropertiesButtonRef.current = () => setShowPropertiesModal(true);
@@ -72,6 +76,7 @@ export function ApsViewer({
           setupViewerToolbar(
             viewer,
             onClickVersionsButton,
+            onClickVersionsListButton,
             onClickFishBtn,
             onClickPropertiesButton,
           );

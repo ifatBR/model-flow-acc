@@ -16,23 +16,7 @@ import {
   KEY_DIMENSION_BY_CATEGORY,
   UNIT_LABELS,
 } from "../helpers/properties.helper";
-
-export interface SelectedElementData {
-  properties: {
-    category?: string;
-    name?: string;
-    level?: string;
-    material?: string;
-    length?: string;
-    area?: string;
-    height?: string;
-    thickness?: string;
-    width?: string;
-    diameter?: string;
-    slope?: string;
-    insulation?: string;
-  };
-}
+import type { SelectedElementData } from "@/context/ViewerModal.context.";
 
 interface PropertiesModalProps {
   element: SelectedElementData;

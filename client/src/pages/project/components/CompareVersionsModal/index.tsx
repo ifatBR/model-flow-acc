@@ -49,6 +49,7 @@ export interface CompareVersionsModalProps {
   currentViewName: string | null;
   viewerRef: React.MutableRefObject<any>;
   onVersionChange: (urn: string, versionNumber: number) => void;
+  onClosePropertiesModal: () => void;
   onClose: () => void;
 }
 
@@ -61,6 +62,7 @@ export function CompareVersionsModal({
   currentViewName,
   viewerRef,
   onVersionChange,
+  onClosePropertiesModal,
   onClose,
 }: CompareVersionsModalProps) {
   const latestVersionNumber = versions[0]?.versionNumber ?? 0;
@@ -88,8 +90,9 @@ export function CompareVersionsModal({
       if (!target) return;
       const encodedUrn = Buffer.from(target.id).toString("base64");
       onVersionChange(encodedUrn, versionNumber);
+      onClosePropertiesModal();
     },
-    [versions, onVersionChange],
+    [versions, onVersionChange, onClosePropertiesModal],
   );
 
   const handleCompare = async () => {

@@ -14,6 +14,7 @@ import {
 import type { FolderItem, ItemVersion } from "@/api/project";
 import { ViewerModal } from "./components/ViewerModal";
 import { Buffer } from "buffer";
+import { ViewerModalProvider } from "@/context/ViewerModal.context.";
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -281,15 +282,17 @@ export function ProjectPage() {
           />
         </TreeView.Tree>
       </TreeView.Root>
-      <ViewerModal
-        fileName={previewFileName}
-        browseUrn={urn}
-        setUrn={setUrn}
-        versions={versions}
-        itemId={itemId}
-        currentVersionNumber={currentVersionNumber}
-        onVersionChange={onVersionChange}
-      />
+      <ViewerModalProvider>
+        <ViewerModal
+          fileName={previewFileName}
+          browseUrn={urn}
+          setUrn={setUrn}
+          versions={versions}
+          itemId={itemId}
+          currentVersionNumber={currentVersionNumber}
+          onVersionChange={onVersionChange}
+        />
+      </ViewerModalProvider>
     </Box>
   );
 }
