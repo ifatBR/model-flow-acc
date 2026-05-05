@@ -1,6 +1,6 @@
 export function setupViewerToolbar(
   viewer: Autodesk.Viewing.GuiViewer3D,
-  onClickVersionsButton: () => void,
+  onClickVersioncompareButton: () => void,
   onClickVersionsListButton: () => void,
   onClickFishBtn: () => void,
   onClickPropertiesButton: () => void,
@@ -15,25 +15,25 @@ export function setupViewerToolbar(
     onClickFishBtn();
   };
 
-  const versionsButton = new window.Autodesk.Viewing.UI.Button(
-    "versions-button",
-  );
-  versionsButton.setToolTip("Compare Versions");
-  versionsButton.onClick = () => {
-    if (
-      versionsButton.getState() !==
-      window.Autodesk.Viewing.UI.Button.State.DISABLED
-    ) {
-      onClickVersionsButton();
-    }
-  };
-
   const versionsListButton = new window.Autodesk.Viewing.UI.Button(
     "versions-list-button",
   );
   versionsListButton.setToolTip("Version List");
   versionsListButton.onClick = () => {
     onClickVersionsListButton();
+  };
+
+  const versionCompareButton = new window.Autodesk.Viewing.UI.Button(
+    "version-compare-button",
+  );
+  versionCompareButton.setToolTip("Compare Versions");
+  versionCompareButton.onClick = () => {
+    if (
+      versionCompareButton.getState() !==
+      window.Autodesk.Viewing.UI.Button.State.DISABLED
+    ) {
+      onClickVersioncompareButton();
+    }
   };
 
   const propertiesButton = new window.Autodesk.Viewing.UI.Button(
@@ -51,7 +51,7 @@ export function setupViewerToolbar(
   };
 
   const setVersionsEnabled = (enabled: boolean) => {
-    versionsButton.setState(
+    versionCompareButton.setState(
       enabled
         ? window.Autodesk.Viewing.UI.Button.State.INACTIVE
         : window.Autodesk.Viewing.UI.Button.State.DISABLED,
@@ -68,8 +68,8 @@ export function setupViewerToolbar(
 
   const group = new window.Autodesk.Viewing.UI.ControlGroup("demo-group");
   group.addControl(fishButton);
-  group.addControl(versionsButton);
   group.addControl(versionsListButton);
+  group.addControl(versionCompareButton);
   group.addControl(propertiesButton);
 
   const addToolbar = () => {

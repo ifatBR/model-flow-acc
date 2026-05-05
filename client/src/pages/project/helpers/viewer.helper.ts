@@ -1,4 +1,4 @@
-import type { SelectedElementData } from "@/context/ViewerModal.context.";
+import type { SelectedElementData } from "../components/PropertiesModal";
 
 export function getExternalIdMap(viewer: any): Promise<Record<string, number>> {
   return new Promise((resolve) => {

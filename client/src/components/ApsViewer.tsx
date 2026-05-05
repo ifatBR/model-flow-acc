@@ -7,18 +7,14 @@ import {
   setupViewerToolbar,
 } from "@/pages/project/helpers/viewerToolbar.helper";
 import { useViewerModal } from "@/context/ViewerModal.context.";
+import { parseViewerElement } from "@/pages/project/helpers/viewer.helper";
 
 interface ApsViewerProps {
   urn: string | null;
   setIsLoading: (val: boolean) => void;
-  onRawElementSelected: (rawResult: any | null) => void;
 }
 
-export function ApsViewer({
-  urn,
-  setIsLoading,
-  onRawElementSelected,
-}: ApsViewerProps) {
+export function ApsViewer({ urn, setIsLoading }: ApsViewerProps) {
   const {
     viewerRef,
     viewerDocRef,
@@ -29,6 +25,7 @@ export function ApsViewer({
     setShowPropertiesModal,
     setSelectedViewIndex,
     setViews,
+    setSelectedElement,
   } = useViewerModal();
   const [showFish, setShowFish] = useState<boolean>(false);
 
@@ -43,17 +40,31 @@ export function ApsViewer({
   };
 
   const onClickVersionsButtonRef = useRef<() => void>(() => {});
-  onClickVersionsButtonRef.current = () => setShowCompareModal(true);
+  onClickVersionsButtonRef.current = () => {
+    setShowVersionsModal(false);
+    setShowCompareModal(true);
+  };
   const onClickVersionsButton = () => onClickVersionsButtonRef.current();
 
   const onClickVersionsListButtonRef = useRef<() => void>(() => {});
-  onClickVersionsListButtonRef.current = () => setShowVersionsModal(true);
+  onClickVersionsListButtonRef.current = () => {
+    setShowCompareModal(false);
+    setShowVersionsModal(true);
+  };
   const onClickVersionsListButton = () =>
     onClickVersionsListButtonRef.current();
 
   const onClickPropertiesButtonRef = useRef<() => void>(() => {});
   onClickPropertiesButtonRef.current = () => setShowPropertiesModal(true);
   const onClickPropertiesButton = () => onClickPropertiesButtonRef.current();
+
+  const onRawElementSelected = (rawResult: any | null) => {
+    if (rawResult === null) {
+      setSelectedElement(null);
+      return;
+    }
+    setSelectedElement(parseViewerElement(rawResult));
+  };
 
   useEffect(() => {
     let cancelled = false;

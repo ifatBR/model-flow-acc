@@ -1,3 +1,4 @@
+import type { SelectedElementData } from "@/pages/project/components/PropertiesModal";
 import {
   createContext,
   useContext,
@@ -5,23 +6,6 @@ import {
   useState,
   type RefObject,
 } from "react";
-
-export interface SelectedElementData {
-  properties: {
-    category?: string;
-    name?: string;
-    level?: string;
-    material?: string;
-    length?: string;
-    area?: string;
-    height?: string;
-    thickness?: string;
-    width?: string;
-    diameter?: string;
-    slope?: string;
-    insulation?: string;
-  };
-}
 
 type ViewerModalContextType = {
   showCompareModal: boolean;

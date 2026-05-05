@@ -16,11 +16,23 @@ import {
   KEY_DIMENSION_BY_CATEGORY,
   UNIT_LABELS,
 } from "../helpers/properties.helper";
-import type { SelectedElementData } from "@/context/ViewerModal.context.";
+import { useViewerModal } from "@/context/ViewerModal.context.";
 
-interface PropertiesModalProps {
-  element: SelectedElementData;
-  onClose: () => void;
+export interface SelectedElementData {
+  properties: {
+    category?: string;
+    name?: string;
+    level?: string;
+    material?: string;
+    length?: string;
+    area?: string;
+    height?: string;
+    thickness?: string;
+    width?: string;
+    diameter?: string;
+    slope?: string;
+    insulation?: string;
+  };
 }
 
 function PropertyRow({
@@ -46,8 +58,11 @@ function PropertyRow({
   );
 }
 
-export function PropertiesModal({ element, onClose }: PropertiesModalProps) {
-  const { properties } = element;
+export function PropertiesModal() {
+  const { selectedElement, setShowPropertiesModal } = useViewerModal();
+  if (!selectedElement) return;
+
+  const { properties } = selectedElement;
 
   const {
     category,
@@ -117,7 +132,7 @@ export function PropertiesModal({ element, onClose }: PropertiesModalProps) {
           size="xs"
           variant="ghost"
           color={COLORS.text.secondary}
-          onClick={onClose}
+          onClick={() => setShowPropertiesModal(false)}
         >
           <X size={14} />
         </IconButton>

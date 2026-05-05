@@ -4,7 +4,10 @@ import { Buffer } from "buffer";
 import type { ItemVersion, ModelElement } from "@/api/project";
 import { ensureSnapshot } from "@/utils/snapshotStore";
 import { runComparison } from "../../helpers/comparison.helper";
-import { isolateAndHighlight } from "../../helpers/viewer.helper";
+import {
+  clearIsolateAndHighlight,
+  isolateAndHighlight,
+} from "../../helpers/viewer.helper";
 import {
   COLORS,
   RADII,
@@ -17,6 +20,7 @@ import { VersionSelcection } from "./VersionSelection";
 import { ConfirmBanner } from "./ConfirmBanner";
 import { VersionBanner } from "./VersionBanner";
 import { CompareHeader } from "./CompareHeader";
+import { useViewerModal } from "@/context/ViewerModal.context.";
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -46,11 +50,7 @@ export interface CompareVersionsModalProps {
   versions: ItemVersion[];
   itemId: string;
   currentVersionNumber?: number;
-  currentViewName: string | null;
-  viewerRef: React.MutableRefObject<any>;
   onVersionChange: (urn: string, versionNumber: number) => void;
-  onClosePropertiesModal: () => void;
-  onClose: () => void;
 }
 
 // ─── Component ───────────────────────────────────────────────────────────────
@@ -59,12 +59,14 @@ export function CompareVersionsModal({
   versions,
   itemId,
   currentVersionNumber,
-  currentViewName,
-  viewerRef,
   onVersionChange,
-  onClosePropertiesModal,
-  onClose,
 }: CompareVersionsModalProps) {
+  const {
+    currentViewName,
+    viewerRef,
+    setShowPropertiesModal,
+    setShowCompareModal,
+  } = useViewerModal();
   const latestVersionNumber = versions[0]?.versionNumber ?? 0;
 
   const [earlierVersionNum, setEarlierVersionNum] = useState<number | null>(
@@ -90,9 +92,9 @@ export function CompareVersionsModal({
       if (!target) return;
       const encodedUrn = Buffer.from(target.id).toString("base64");
       onVersionChange(encodedUrn, versionNumber);
-      onClosePropertiesModal();
+      setShowPropertiesModal(false);
     },
-    [versions, onVersionChange, onClosePropertiesModal],
+    [versions, onVersionChange, setShowPropertiesModal],
   );
 
   const handleCompare = async () => {
@@ -184,6 +186,15 @@ export function CompareVersionsModal({
     ],
   );
 
+  const onCloseCompareVersionModal = () => {
+    clearIsolateAndHighlight(viewerRef?.current);
+    const latestVersion = versions?.[0];
+    if (latestVersion) {
+      const encodedUrn = Buffer.from(latestVersion.id).toString("base64");
+      onVersionChange?.(encodedUrn, latestVersion.versionNumber);
+    }
+    setShowCompareModal(false);
+  };
   const isCurrentLatest = currentVersionNumber === latestVersionNumber;
 
   const otherVersionNum =
@@ -213,7 +224,7 @@ export function CompareVersionsModal({
         earlierVersionNum={earlierVersionNum}
         laterVersionNum={laterVersionNum}
         handleBack={handleBack}
-        onClose={onClose}
+        onClose={onCloseCompareVersionModal}
       />
 
       {/* ── Version banner (diff view only) ── */}

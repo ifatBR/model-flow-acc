@@ -5,10 +5,6 @@ import { useEffect, useState } from "react";
 import type { ItemVersion } from "@/api/project";
 import { CompareVersionsModal } from "./CompareVersionsModal";
 import { VersionsModal } from "./VersionsModal";
-import {
-  clearIsolateAndHighlight,
-  parseViewerElement,
-} from "../helpers/viewer.helper";
 import { Buffer } from "buffer";
 import { COLORS, SPACING } from "@/styles/designTokens";
 import { ViewsList } from "./ViewsList";
@@ -44,12 +40,10 @@ export function ViewerModal({
     showPropertiesModal,
     setShowPropertiesModal,
     selectedElement,
-    setSelectedElement,
     selectedViewIndex,
     setSelectedViewIndex,
     views,
     setViews,
-    currentViewName,
     setCurrentViewName,
     viewerRef,
     viewerDocRef,
@@ -70,20 +64,12 @@ export function ViewerModal({
     }
   }, [selectedViewIndex, views]);
 
-  const onCloseCompareVersionModal = () => {
-    clearIsolateAndHighlight(viewerRef?.current);
-    const latestVersion = versions?.[0];
-    if (latestVersion) {
-      const encodedUrn = Buffer.from(latestVersion.id).toString("base64");
-      onVersionChange?.(encodedUrn, latestVersion.versionNumber);
-    }
-    setShowCompareModal(false);
-  };
-
   const onCloseViewerModal = () => {
     currentViewNameRef.current = null;
     setCurrentViewName(null);
     setShowPropertiesModal(false);
+    setShowCompareModal(false);
+    setShowVersionsModal(false);
     setViews([]);
     setSelectedViewIndex(-1);
     setUrn(null);
@@ -99,19 +85,12 @@ export function ViewerModal({
     setShowCompareModal(false);
   };
 
-  const onRawElementSelected = (rawResult: any | null) => {
-    if (rawResult === null) {
-      setSelectedElement(null);
-      return;
-    }
-    setSelectedElement(parseViewerElement(rawResult));
-  };
-
   const onSelectVersion = (versionNumber: number) => {
     const target = versions?.find((v) => v.versionNumber === versionNumber);
     if (target) {
       const encodedUrn = Buffer.from(target.id).toString("base64");
       onVersionChange?.(encodedUrn, versionNumber);
+      setShowPropertiesModal(false);
     }
     setShowVersionsModal(false);
   };
@@ -145,11 +124,7 @@ export function ViewerModal({
               </Dialog.CloseTrigger>
             </Dialog.Header>
             <Dialog.Body position="relative">
-              <ApsViewer
-                urn={browseUrn}
-                setIsLoading={setIsLoading}
-                onRawElementSelected={onRawElementSelected}
-              />
+              <ApsViewer urn={browseUrn} setIsLoading={setIsLoading} />
               {showVersionsModal && hasVersions && onVersionChange && (
                 <VersionsModal
                   versions={versions}
@@ -163,19 +138,10 @@ export function ViewerModal({
                   versions={versions}
                   itemId={itemId}
                   currentVersionNumber={currentVersionNumber}
-                  currentViewName={currentViewName}
-                  viewerRef={viewerRef}
                   onVersionChange={onVersionChange}
-                  onClosePropertiesModal={() => setShowPropertiesModal(false)}
-                  onClose={onCloseCompareVersionModal}
                 />
               )}
-              {showPropertiesModal && selectedElement && (
-                <PropertiesModal
-                  element={selectedElement}
-                  onClose={() => setShowPropertiesModal(false)}
-                />
-              )}
+              {showPropertiesModal && selectedElement && <PropertiesModal />}
             </Dialog.Body>
           </Dialog.Content>
         </Dialog.Positioner>
