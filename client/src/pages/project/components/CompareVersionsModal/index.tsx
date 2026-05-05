@@ -1,7 +1,7 @@
 import { useState, useCallback, useRef, useEffect } from "react";
 import { Box, Flex } from "@chakra-ui/react";
 import { Buffer } from "buffer";
-import type { ItemVersion, ModelElement } from "@/api/project";
+import type { ModelElement } from "@/api/project";
 import { ensureSnapshot } from "@/utils/snapshotStore";
 import { runComparison } from "../../helpers/comparison.helper";
 import {
@@ -21,6 +21,7 @@ import { ConfirmBanner } from "./ConfirmBanner";
 import { VersionBanner } from "./VersionBanner";
 import { CompareHeader } from "./CompareHeader";
 import { useViewerModal } from "@/context/ViewerModal.context.";
+import { useProjectPage } from "@/context/ProjectPage.context";
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -47,18 +48,12 @@ interface ConfirmState {
 }
 
 export interface CompareVersionsModalProps {
-  versions: ItemVersion[];
-  itemId: string;
-  currentVersionNumber?: number;
   onVersionChange: (urn: string, versionNumber: number) => void;
 }
 
 // ─── Component ───────────────────────────────────────────────────────────────
 
 export function CompareVersionsModal({
-  versions,
-  itemId,
-  currentVersionNumber,
   onVersionChange,
 }: CompareVersionsModalProps) {
   const {
@@ -67,6 +62,7 @@ export function CompareVersionsModal({
     setShowPropertiesModal,
     setShowCompareModal,
   } = useViewerModal();
+  const { versions, itemId, currentVersionNumber } = useProjectPage();
   const latestVersionNumber = versions[0]?.versionNumber ?? 0;
 
   const [earlierVersionNum, setEarlierVersionNum] = useState<number | null>(
@@ -98,7 +94,7 @@ export function CompareVersionsModal({
   );
 
   const handleCompare = async () => {
-    if (selectedV1 === null || selectedV2 === null) return;
+    if (selectedV1 === null || selectedV2 === null || !itemId) return;
     const later = Math.max(selectedV1, selectedV2);
     const earlier = Math.min(selectedV1, selectedV2);
 

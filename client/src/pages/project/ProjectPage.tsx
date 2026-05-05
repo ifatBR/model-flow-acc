@@ -11,10 +11,11 @@ import {
   fetchFolderContents,
   getItemVersions,
 } from "@/api/project";
-import type { FolderItem, ItemVersion } from "@/api/project";
+import type { FolderItem } from "@/api/project";
 import { ViewerModal } from "./components/ViewerModal";
 import { Buffer } from "buffer";
 import { ViewerModalProvider } from "@/context/ViewerModal.context.";
+import { useProjectPage } from "@/context/ProjectPage.context";
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -91,6 +92,13 @@ function NodeIcon({ type }: { type: ProjectNodeType }) {
 
 export function ProjectPage() {
   const queryClient = useQueryClient();
+  const {
+    setPreviewFileName,
+    setUrn,
+    setVersions,
+    setItemId,
+    setCurrentVersionNumber,
+  } = useProjectPage();
 
   const {
     data: hubs,
@@ -101,23 +109,10 @@ export function ProjectPage() {
     queryFn: fetchHubs,
   });
 
-  const [urn, setUrn] = useState<string | null>(null);
-  const [previewFileName, setPreviewFileName] = useState<string | null>(null);
-  const [versions, setVersions] = useState<ItemVersion[]>([]);
-  const [itemId, setItemId] = useState<string | null>(null);
-  const [currentVersionNumber, setCurrentVersionNumber] = useState(0);
   const [collection, setCollection] =
     useState<TreeCollection<ProjectNode>>(EMPTY_COLLECTION);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const hubsInitialized = useRef(false);
-
-  const onVersionChange = useCallback(
-    (newUrn: string, versionNumber: number) => {
-      setUrn(newUrn);
-      setCurrentVersionNumber(versionNumber);
-    },
-    [],
-  );
 
   const viewItem = async (
     itemName: string,
@@ -283,15 +278,7 @@ export function ProjectPage() {
         </TreeView.Tree>
       </TreeView.Root>
       <ViewerModalProvider>
-        <ViewerModal
-          fileName={previewFileName}
-          browseUrn={urn}
-          setUrn={setUrn}
-          versions={versions}
-          itemId={itemId}
-          currentVersionNumber={currentVersionNumber}
-          onVersionChange={onVersionChange}
-        />
+        <ViewerModal />
       </ViewerModalProvider>
     </Box>
   );

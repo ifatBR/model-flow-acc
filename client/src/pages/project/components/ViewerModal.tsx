@@ -1,37 +1,25 @@
 import { ApsViewer } from "@/components/ApsViewer";
 import { Loader } from "@/components/Loader";
 import { CloseButton, Dialog, Flex, Portal } from "@chakra-ui/react";
-import { useEffect, useState } from "react";
-import type { ItemVersion } from "@/api/project";
+import { useCallback, useEffect, useState } from "react";
 import { CompareVersionsModal } from "./CompareVersionsModal";
 import { VersionsModal } from "./VersionsModal";
-import { Buffer } from "buffer";
 import { COLORS, SPACING } from "@/styles/designTokens";
 import { ViewsList } from "./ViewsList";
-import { useLayout } from "@/context/LayoutContext";
 import { PropertiesModal } from "./PropertiesModal";
 import { useViewerModal } from "@/context/ViewerModal.context.";
+import { useProjectPage } from "@/context/ProjectPage.context";
 
-interface ViewerModalProps {
-  fileName: string | null;
-  browseUrn: string | null;
-  setUrn: (value: string | null) => void;
-  versions?: ItemVersion[];
-  itemId?: string | null;
-  currentVersionNumber?: number;
-  onVersionChange?: (urn: string, versionNumber: number) => void;
-}
+export function ViewerModal() {
+  const {
+    previewFileName: fileName,
+    urn: browseUrn,
+    setUrn,
+    versions,
+    itemId,
+    setCurrentVersionNumber,
+  } = useProjectPage();
 
-export function ViewerModal({
-  fileName,
-  browseUrn,
-  setUrn,
-  versions,
-  itemId,
-  currentVersionNumber,
-  onVersionChange,
-}: ViewerModalProps) {
-  useLayout();
   const {
     showCompareModal,
     setShowCompareModal,
@@ -45,8 +33,6 @@ export function ViewerModal({
     views,
     setViews,
     setCurrentViewName,
-    viewerRef,
-    viewerDocRef,
     versionsButtonRef,
     currentViewNameRef,
   } = useViewerModal();
@@ -54,6 +40,14 @@ export function ViewerModal({
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
   const hasVersions = versions && versions.length > 1 && itemId;
+
+  const onVersionChange = useCallback(
+    (newUrn: string, versionNumber: number) => {
+      setUrn(newUrn);
+      setCurrentVersionNumber(versionNumber);
+    },
+    [],
+  );
 
   useEffect(() => {
     if (selectedViewIndex >= 0 && views.length > 0) {
@@ -75,26 +69,6 @@ export function ViewerModal({
     setUrn(null);
   };
 
-  const onLoadView = async (index: number) => {
-    const view = views[index];
-    viewerRef?.current?.loadDocumentNode(viewerDocRef.current, view);
-
-    setCurrentViewName(view.data.name);
-    currentViewNameRef.current = view.data.name;
-    versionsButtonRef.current?.(view.data.role === "3d");
-    setShowCompareModal(false);
-  };
-
-  const onSelectVersion = (versionNumber: number) => {
-    const target = versions?.find((v) => v.versionNumber === versionNumber);
-    if (target) {
-      const encodedUrn = Buffer.from(target.id).toString("base64");
-      onVersionChange?.(encodedUrn, versionNumber);
-      setShowPropertiesModal(false);
-    }
-    setShowVersionsModal(false);
-  };
-
   return isLoading ? (
     <Loader />
   ) : (
@@ -113,11 +87,7 @@ export function ViewerModal({
             <Dialog.Header>
               <Flex w="100%" justify="space-between" pr={SPACING[6]}>
                 <Dialog.Title>{fileName}</Dialog.Title>
-                <ViewsList
-                  views={views}
-                  defaultIndex={selectedViewIndex}
-                  onLoadView={onLoadView}
-                />
+                <ViewsList />
               </Flex>
               <Dialog.CloseTrigger asChild>
                 <CloseButton size="sm" />
@@ -127,19 +97,12 @@ export function ViewerModal({
               <ApsViewer urn={browseUrn} setIsLoading={setIsLoading} />
               {showVersionsModal && hasVersions && onVersionChange && (
                 <VersionsModal
-                  versions={versions}
-                  currentVersionNumber={currentVersionNumber}
-                  onSelectVersion={onSelectVersion}
+                  onVersionChange={onVersionChange}
                   onClose={() => setShowVersionsModal(false)}
                 />
               )}
               {showCompareModal && hasVersions && onVersionChange && (
-                <CompareVersionsModal
-                  versions={versions}
-                  itemId={itemId}
-                  currentVersionNumber={currentVersionNumber}
-                  onVersionChange={onVersionChange}
-                />
+                <CompareVersionsModal onVersionChange={onVersionChange} />
               )}
               {showPropertiesModal && selectedElement && <PropertiesModal />}
             </Dialog.Body>

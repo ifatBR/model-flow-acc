@@ -9,20 +9,31 @@ import {
   Z_INDEX,
 } from "@/styles/designTokens";
 import { BodyText, Caption, SectionTitle } from "@/components/Typography";
+import { useViewerModal } from "@/context/ViewerModal.context.";
+import { Buffer } from "buffer";
+import { useProjectPage } from "@/context/ProjectPage.context";
 
 interface VersionsModalProps {
-  versions: ItemVersion[];
-  currentVersionNumber?: number;
-  onSelectVersion: (versionNumber: number) => void;
+  onVersionChange: (urn: string, version: number) => void;
   onClose: () => void;
 }
 
 export function VersionsModal({
-  versions,
-  currentVersionNumber,
-  onSelectVersion,
+  onVersionChange,
   onClose,
 }: VersionsModalProps) {
+  const { setShowVersionsModal, setShowPropertiesModal } = useViewerModal();
+  const { versions, currentVersionNumber } = useProjectPage();
+  const onSelectVersion = (versionNumber: number) => {
+    const target = versions?.find((v) => v.versionNumber === versionNumber);
+    if (target) {
+      const encodedUrn = Buffer.from(target.id).toString("base64");
+      onVersionChange?.(encodedUrn, versionNumber);
+      setShowPropertiesModal(false);
+    }
+    setShowVersionsModal(false);
+  };
+
   return (
     <Flex
       position="absolute"

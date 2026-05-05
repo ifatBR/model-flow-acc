@@ -18,7 +18,7 @@ type ViewerModalContextType = {
   setSelectedElement: (value: SelectedElementData | null) => void;
   selectedViewIndex: number;
   setSelectedViewIndex: (value: number) => void;
-  views: any;
+  views: any[];
   setViews: (value: any) => void;
   currentViewName: string | null;
   setCurrentViewName: (value: string | null) => void;

@@ -1,16 +1,31 @@
 import { SectionTitle } from "@/components/Typography";
+import { useViewerModal } from "@/context/ViewerModal.context.";
 import { COLORS, RADII, SPACING } from "@/styles/designTokens";
 import { Flex, NativeSelect } from "@chakra-ui/react";
 import { useEffect, useState } from "react";
 
-interface ViewsListProps {
-  views: any[];
-  defaultIndex: number;
-  onLoadView: (index: number) => void;
-}
-
-export function ViewsList({ views, defaultIndex, onLoadView }: ViewsListProps) {
+export function ViewsList() {
+  const {
+    views,
+    selectedViewIndex: defaultIndex,
+    viewerRef,
+    viewerDocRef,
+    currentViewNameRef,
+    versionsButtonRef,
+    setShowCompareModal,
+    setCurrentViewName,
+  } = useViewerModal();
   const [selectedIndex, setSelectedIndex] = useState<string>("");
+
+  const onLoadView = async (index: number) => {
+    const view = views[index];
+    viewerRef?.current?.loadDocumentNode(viewerDocRef.current, view);
+
+    setCurrentViewName(view.data.name);
+    currentViewNameRef.current = view.data.name;
+    versionsButtonRef.current?.(view.data.role === "3d");
+    setShowCompareModal(false);
+  };
 
   useEffect(() => {
     setSelectedIndex(defaultIndex >= 0 ? String(defaultIndex) : "");

@@ -6,6 +6,7 @@ import { LandingPage } from "@/pages/landing/LandingPage";
 import { ProjectPage } from "@/pages/project/ProjectPage";
 import { LayoutProvider } from "@/context/LayoutContext";
 import { RouteErrorPage } from "@/components/RouteErrorPage";
+import { ProjectPageProvider } from "@/context/ProjectPage.context";
 
 const routerConfig = [
   { path: ROUTES.LANDING, element: <LandingPage /> },
@@ -20,7 +21,14 @@ const routerConfig = [
     children: [
       { index: true, element: <Navigate to={ROUTES.LANDING} replace /> },
       { path: ROUTES.VIEWER, element: <ViewerPage /> },
-      { path: ROUTES.PROJECT, element: <ProjectPage /> },
+      {
+        path: ROUTES.PROJECT,
+        element: (
+          <ProjectPageProvider>
+            <ProjectPage />
+          </ProjectPageProvider>
+        ),
+      },
     ],
   },
 ];
