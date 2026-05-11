@@ -7,16 +7,17 @@ import {
   SPACING,
   Z_INDEX,
 } from "@/styles/designTokens";
-import { BodyText, Caption, SectionTitle } from "@/components/Typography";
-import { getElementDisplayName } from "../helpers/display.helper";
+import { SectionTitle } from "@/components/Typography";
+import { getElementDisplayName } from "../../helpers/display.helper";
 import {
   FIELD_UNIT,
   getCategoryKey,
   getFormattedValue,
   KEY_DIMENSION_BY_CATEGORY,
   UNIT_LABELS,
-} from "../helpers/properties.helper";
+} from "../../helpers/properties.helper";
 import { useViewerModal } from "@/context/ViewerModal.context.";
+import { PropertyRow } from "./PropertyRow";
 
 export interface SelectedElementData {
   properties: {
@@ -33,29 +34,6 @@ export interface SelectedElementData {
     slope?: string;
     insulation?: string;
   };
-}
-
-function PropertyRow({
-  label,
-  value,
-}: {
-  label: string;
-  value: string | undefined;
-}) {
-  if (value === undefined || value === null || value === "") return null;
-  return (
-    <Flex
-      justify="space-between"
-      align="flex-start"
-      py={SPACING[2]}
-      borderBottomWidth="1px"
-      borderColor={COLORS.bg.elevated}
-      gap={SPACING[4]}
-    >
-      <Caption>{label}</Caption>
-      <BodyText>{value}</BodyText>
-    </Flex>
-  );
 }
 
 export function PropertiesModal() {
