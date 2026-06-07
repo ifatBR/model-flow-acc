@@ -54,7 +54,9 @@ export function ViewerModal() {
       const view = views[selectedViewIndex];
       setCurrentViewName(view.data.name);
       currentViewNameRef.current = view.data.name;
-      versionsButtonRef.current?.(view.data.role === "3d");
+      versionsButtonRef.current?.(
+        view.data.role === "3d" && (versions?.length ?? 0) > 1,
+      );
     }
   }, [selectedViewIndex, views]);
 

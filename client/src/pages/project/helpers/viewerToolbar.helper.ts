@@ -19,14 +19,23 @@ export function setupViewerToolbar(
     "versions-list-button",
   );
   versionsListButton.setToolTip("Version List");
+  versionsListButton.setState(window.Autodesk.Viewing.UI.Button.State.DISABLED);
   versionsListButton.onClick = () => {
-    onClickVersionsListButton();
+    if (
+      versionsListButton.getState() !==
+      window.Autodesk.Viewing.UI.Button.State.DISABLED
+    ) {
+      onClickVersionsListButton();
+    }
   };
 
   const versionCompareButton = new window.Autodesk.Viewing.UI.Button(
     "version-compare-button",
   );
   versionCompareButton.setToolTip("Compare Versions");
+  versionCompareButton.setState(
+    window.Autodesk.Viewing.UI.Button.State.DISABLED,
+  );
   versionCompareButton.onClick = () => {
     if (
       versionCompareButton.getState() !==
@@ -52,6 +61,11 @@ export function setupViewerToolbar(
 
   const setVersionsEnabled = (enabled: boolean) => {
     versionCompareButton.setState(
+      enabled
+        ? window.Autodesk.Viewing.UI.Button.State.INACTIVE
+        : window.Autodesk.Viewing.UI.Button.State.DISABLED,
+    );
+    versionsListButton.setState(
       enabled
         ? window.Autodesk.Viewing.UI.Button.State.INACTIVE
         : window.Autodesk.Viewing.UI.Button.State.DISABLED,

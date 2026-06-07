@@ -178,7 +178,7 @@ async function extractFromViewer(
         }
       };
 
-      window.Autodesk.Viewing.Initializer({ accessToken }, () => {
+      window.Autodesk.Viewing.Initializer({ accessToken, env: 'AutodeskProduction2', api: 'streamingV2_EU' }, () => {
         viewer = new window.Autodesk.Viewing.GuiViewer3D(container, {});
         viewer.start();
 

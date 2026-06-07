@@ -73,79 +73,93 @@ export function ApsViewer({ urn, setIsLoading }: ApsViewerProps) {
 
       if (cancelled) return;
       const accessToken = await getAccessToken();
-      window.Autodesk.Viewing.Initializer({ accessToken: accessToken }, () => {
-        if (!containerRef.current || cancelled) return;
-        const viewer = new window.Autodesk.Viewing.GuiViewer3D(
-          containerRef.current,
-        );
-
-        viewerRef.current = viewer;
-        if (!viewer) return;
-        viewer.start();
-
-        const { cleanup, setVersionsEnabled, setPropertiesEnabled } =
-          setupViewerToolbar(
-            viewer,
-            onClickVersionsButton,
-            onClickVersionsListButton,
-            onClickFishBtn,
-            onClickPropertiesButton,
+      window.Autodesk.Viewing.Initializer(
+        {
+          accessToken: accessToken,
+          env: "AutodeskProduction2",
+          api: "streamingV2_EU",
+        },
+        () => {
+          if (!containerRef.current || cancelled) return;
+          const viewer = new window.Autodesk.Viewing.GuiViewer3D(
+            containerRef.current,
           );
-        toolbarCleanupRef.current = cleanup;
-        versionsButtonRef.current = setVersionsEnabled;
-        setPropertiesEnabledRef.current = setPropertiesEnabled;
 
-        viewer.addEventListener(
-          window.Autodesk.Viewing.SELECTION_CHANGED_EVENT,
-          (event: any) => {
-            const dbIds: number[] = event.dbIdArray ?? [];
-            if (dbIds.length === 0) {
-              setPropertiesEnabledRef.current?.(false);
-              onRawElementSelected(null);
-              return;
-            }
-            setPropertiesEnabledRef.current?.(true);
-            viewer.getProperties(dbIds[0], (result: any) => {
-              onRawElementSelected(result);
-            });
-          },
-        );
+          viewerRef.current = viewer;
+          if (!viewer) return;
+          viewer.start();
 
-        viewer.addEventListener(Autodesk.Viewing.TOOLBAR_CREATED_EVENT, () => {
-          removeBuiltInButtons(viewer);
+          const { cleanup, setVersionsEnabled, setPropertiesEnabled } =
+            setupViewerToolbar(
+              viewer,
+              onClickVersionsButton,
+              onClickVersionsListButton,
+              onClickFishBtn,
+              onClickPropertiesButton,
+            );
+          toolbarCleanupRef.current = cleanup;
+          versionsButtonRef.current = setVersionsEnabled;
+          setPropertiesEnabledRef.current = setPropertiesEnabled;
 
-          // some controls are added slightly later
-          setTimeout(() => removeBuiltInButtons(viewer), 500);
-        });
+          viewer.addEventListener(
+            window.Autodesk.Viewing.SELECTION_CHANGED_EVENT,
+            (event: any) => {
+              const dbIds: number[] = event.dbIdArray ?? [];
+              if (dbIds.length === 0) {
+                setPropertiesEnabledRef.current?.(false);
+                onRawElementSelected(null);
+                return;
+              }
+              setPropertiesEnabledRef.current?.(true);
+              viewer.getProperties(dbIds[0], (result: any) => {
+                onRawElementSelected(result);
+              });
+            },
+          );
 
-        setIsLoading(false);
+          viewer.addEventListener(
+            Autodesk.Viewing.TOOLBAR_CREATED_EVENT,
+            () => {
+              removeBuiltInButtons(viewer);
 
-        window.Autodesk.Viewing.Document.load(
-          `urn:${urn}`,
-          (doc: any) => {
-            const root = doc.getRoot();
-            const viewables = root.search({ type: "geometry" });
-            const views3d = viewables.filter((v: any) => v.data.role === "3d");
-            const views2d = viewables.filter((v: any) => v.data.role === "2d");
-            const allViews = [...views3d, ...views2d];
+              // some controls are added slightly later
+              setTimeout(() => removeBuiltInButtons(viewer), 500);
+            },
+          );
 
-            const defaultModel = root.getDefaultGeometry();
-            const restoredView = currentViewNameRef.current
-              ? (views3d.find(
-                  (v: any) => v.data.name === currentViewNameRef.current,
-                ) ?? defaultModel)
-              : defaultModel;
+          setIsLoading(false);
 
-            viewer.loadDocumentNode(doc, restoredView);
-            viewerDocRef.current = doc;
-            setViews(allViews);
-            setSelectedViewIndex(allViews.indexOf(restoredView));
-          },
-          (errCode: number, errMsg: string) => {
-            console.error("Viewer load error:", errCode, errMsg);
-          },
-        );
-      });
+          window.Autodesk.Viewing.Document.load(
+            `urn:${urn}`,
+            (doc: any) => {
+              const root = doc.getRoot();
+              const viewables = root.search({ type: "geometry" });
+              const views3d = viewables.filter(
+                (v: any) => v.data.role === "3d",
+              );
+              const views2d = viewables.filter(
+                (v: any) => v.data.role === "2d",
+              );
+              const allViews = [...views3d, ...views2d];
+
+              const defaultModel = root.getDefaultGeometry();
+              const restoredView = currentViewNameRef.current
+                ? (views3d.find(
+                    (v: any) => v.data.name === currentViewNameRef.current,
+                  ) ?? defaultModel)
+                : defaultModel;
+
+              viewer.loadDocumentNode(doc, restoredView);
+              viewerDocRef.current = doc;
+              setViews(allViews);
+              setSelectedViewIndex(allViews.indexOf(restoredView));
+            },
+            (errCode: number, errMsg: string) => {
+              console.error("Viewer load error:", errCode, errMsg);
+            },
+          );
+        },
+      );
     }
 
     initViewer();

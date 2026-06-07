@@ -1,10 +1,12 @@
 import { SectionTitle } from "@/components/Typography";
 import { useViewerModal } from "@/context/ViewerModal.context.";
+import { useProjectPage } from "@/context/ProjectPage.context";
 import { COLORS, RADII, SPACING } from "@/styles/designTokens";
 import { Flex, NativeSelect } from "@chakra-ui/react";
 import { useEffect, useState } from "react";
 
 export function ViewsList() {
+  const { versions } = useProjectPage();
   const {
     views,
     selectedViewIndex: defaultIndex,
@@ -23,7 +25,7 @@ export function ViewsList() {
 
     setCurrentViewName(view.data.name);
     currentViewNameRef.current = view.data.name;
-    versionsButtonRef.current?.(view.data.role === "3d");
+    versionsButtonRef.current?.(view.data.role === "3d" && versions.length > 1);
     setShowCompareModal(false);
   };
 
