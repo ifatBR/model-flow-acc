@@ -3,6 +3,8 @@ import {
   getVersionElements,
   saveVersionElements,
   saveVersionElementsChunks,
+  saveComparisonReport,
+  getAllComparisonReports,
 } from './models.services';
 
 export async function modelsRoutes(app: FastifyInstance) {
@@ -31,4 +33,23 @@ export async function modelsRoutes(app: FastifyInstance) {
       return reply.code(204).send();
     },
   );
+
+  app.post<{
+    Params: { itemId: string; earlierVersion: string; laterVersion: string };
+    Body: { modelName: string; data: { id: string; diff: string }[] };
+  }>('/:itemId/comparisons/:earlierVersion/:laterVersion/report', async (req, reply) => {
+    const { itemId, earlierVersion, laterVersion } = req.params;
+    await saveComparisonReport(
+      decodeURIComponent(itemId),
+      parseInt(earlierVersion, 10),
+      parseInt(laterVersion, 10),
+      req.body.modelName,
+      req.body.data,
+    );
+    return reply.code(204).send();
+  });
+
+  app.get('/comparisons', async () => {
+    return getAllComparisonReports();
+  });
 }

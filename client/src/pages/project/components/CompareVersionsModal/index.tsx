@@ -22,6 +22,7 @@ import { VersionBanner } from "./VersionBanner";
 import { CompareHeader } from "./CompareHeader";
 import { useViewerModal } from "@/context/ViewerModal.context.";
 import { useProjectPage } from "@/context/ProjectPage.context";
+import { saveComparisonReport } from "@/api/model";
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -62,7 +63,7 @@ export function CompareVersionsModal({
     setShowPropertiesModal,
     setShowCompareModal,
   } = useViewerModal();
-  const { versions, itemId, currentVersionNumber } = useProjectPage();
+  const { versions, itemId, currentVersionNumber, previewFileName } = useProjectPage();
   const latestVersionNumber = versions[0]?.versionNumber ?? 0;
 
   const [earlierVersionNum, setEarlierVersionNum] = useState<number | null>(
@@ -117,9 +118,24 @@ export function CompareVersionsModal({
       );
       const laterSnap = await ensureSnapshot(laterUrn, itemId, later, viewName);
 
-      setResult(runComparison(earlierSnap.elements, laterSnap.elements));
+      const compResult = runComparison(earlierSnap.elements, laterSnap.elements);
+      setResult(compResult);
       setLaterVersionNum(later);
       setEarlierVersionNum(earlier);
+
+      if (itemId) {
+        const reportData = [
+          ...compResult.added.map((e) => ({
+            id: e.externalId,
+            diff: `New Element. Version ${later}`,
+          })),
+          ...compResult.modified.map((e) => ({
+            id: e.externalId,
+            diff: `Modified: ${e.changes!.map((c) => c.field === "position" ? `position moved ${(c.distance as number).toFixed(2)} units` : `${c.field} changed from ${c.from} to ${c.to}`).join(", ")}. Version: ${later}`,
+          })),
+        ];
+        saveComparisonReport(itemId, earlier, later, previewFileName ?? "", reportData);
+      }
 
       if (currentVersionNumber && currentVersionNumber !== later) {
         switchToVersion(later);

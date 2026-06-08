@@ -48,3 +48,47 @@ export async function saveVersionElementsChunks(
   const filePath = join(dir, `chunk-${body.chunkIndex}.json`);
   await writeFile(filePath, JSON.stringify(body.elements), 'utf-8');
 }
+
+interface ComparisonReportEntry {
+  itemId: string;
+  earlierVersion: number;
+  laterVersion: number;
+  modelName: string;
+  data: { id: string; diff: string }[];
+}
+
+const COMPARISONS_FILE = join(__dirname, '..', '..', '..', 'data', 'comparisons.json');
+
+async function readComparisonReports(): Promise<ComparisonReportEntry[]> {
+  try {
+    const content = await readFile(COMPARISONS_FILE, 'utf-8');
+    return JSON.parse(content);
+  } catch {
+    return [];
+  }
+}
+
+export async function saveComparisonReport(
+  itemId: string,
+  earlierVersion: number,
+  laterVersion: number,
+  modelName: string,
+  data: { id: string; diff: string }[],
+) {
+  const reports = await readComparisonReports();
+  const idx = reports.findIndex(
+    (r) => r.itemId === itemId && r.earlierVersion === earlierVersion && r.laterVersion === laterVersion,
+  );
+  const entry: ComparisonReportEntry = { itemId, earlierVersion, laterVersion, modelName, data };
+  if (idx !== -1) {
+    reports[idx] = entry;
+  } else {
+    reports.push(entry);
+  }
+  await mkdir(join(__dirname, '..', '..', '..', 'data'), { recursive: true });
+  await writeFile(COMPARISONS_FILE, JSON.stringify(reports, null, 2), 'utf-8');
+}
+
+export async function getAllComparisonReports(): Promise<ComparisonReportEntry[]> {
+  return readComparisonReports();
+}
