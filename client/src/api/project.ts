@@ -52,6 +52,7 @@ export interface ModelElement {
     area?: string;
     height?: string;
     thickness?: string;
+    diameter?: string;
     [key: string]: unknown;
   };
   boundingBox?: BoundingBox;

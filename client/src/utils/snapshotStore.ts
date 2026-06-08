@@ -19,10 +19,11 @@ const PROP_FILTER = [
   "Height",
   "Thickness",
   "Slope",
+  "Diameter",
 ];
 
 const CHUNK_SIZE = 100;
-const EXTRACTION_TIMEOUT_MS = 120_000;
+const EXTRACTION_TIMEOUT_MS = 450_000;
 
 function chunkArray<T>(arr: T[], size: number): T[][] {
   const chunks: T[][] = [];
@@ -178,36 +179,39 @@ async function extractFromViewer(
         }
       };
 
-      window.Autodesk.Viewing.Initializer({ accessToken, env: 'AutodeskProduction2', api: 'streamingV2_EU' }, () => {
-        viewer = new window.Autodesk.Viewing.GuiViewer3D(container, {});
-        viewer.start();
+      window.Autodesk.Viewing.Initializer(
+        { accessToken, env: "AutodeskProduction2", api: "streamingV2_EU" },
+        () => {
+          viewer = new window.Autodesk.Viewing.GuiViewer3D(container, {});
+          viewer.start();
 
-        viewer.addEventListener(
-          window.Autodesk.Viewing.OBJECT_TREE_CREATED_EVENT,
-          onTreeCreated,
-        );
+          viewer.addEventListener(
+            window.Autodesk.Viewing.OBJECT_TREE_CREATED_EVENT,
+            onTreeCreated,
+          );
 
-        window.Autodesk.Viewing.Document.load(
-          `urn:${urn}`,
-          (doc: any) => {
-            const root = doc.getRoot();
-            let geom = root.getDefaultGeometry();
-            if (viewName) {
-              const match = root
-                .search({ type: "geometry", role: "3d" })
-                .find((v: any) => v.data.name === viewName);
-              if (match) geom = match;
-            }
-            viewer.loadDocumentNode(doc, geom);
-          },
-          (errCode: number, errMsg: string) => {
-            cleanup();
-            reject(
-              new Error(`Failed to load model ${urn}: ${errCode} ${errMsg}`),
-            );
-          },
-        );
-      });
+          window.Autodesk.Viewing.Document.load(
+            `urn:${urn}`,
+            (doc: any) => {
+              const root = doc.getRoot();
+              let geom = root.getDefaultGeometry();
+              if (viewName) {
+                const match = root
+                  .search({ type: "geometry", role: "3d" })
+                  .find((v: any) => v.data.name === viewName);
+                if (match) geom = match;
+              }
+              viewer.loadDocumentNode(doc, geom);
+            },
+            (errCode: number, errMsg: string) => {
+              cleanup();
+              reject(
+                new Error(`Failed to load model ${urn}: ${errCode} ${errMsg}`),
+              );
+            },
+          );
+        },
+      );
     });
   } finally {
     if (document.body.contains(container)) {

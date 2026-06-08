@@ -12,18 +12,24 @@ const COMPARED_FIELDS = [
   "area",
   "height",
   "thickness",
+  "diameter",
 ];
 const POSITION_THRESHOLD = 0.01;
+const LENGTH_DIFF_THRESHOLD = 1;
 
 export function compareProperties(
   v1Props: Record<string, unknown>,
   v2Props: Record<string, unknown>,
 ): PropertyChange[] {
-  return COMPARED_FIELDS.filter(
-    (field) =>
-      v1Props[field] !== v2Props[field] &&
-      (v1Props[field] !== undefined || v2Props[field] !== undefined),
-  ).map((field) => ({ field, from: v1Props[field], to: v2Props[field] }));
+  return COMPARED_FIELDS.filter((field) => {
+    if (v1Props[field] === v2Props[field]) return false;
+    if (v1Props[field] === undefined && v2Props[field] === undefined) return false;
+    if (field === "length") {
+      const diff = Math.abs(parseFloat(v2Props[field] as string) - parseFloat(v1Props[field] as string));
+      if (!isNaN(diff) && diff < LENGTH_DIFF_THRESHOLD) return false;
+    }
+    return true;
+  }).map((field) => ({ field, from: v1Props[field], to: v2Props[field] }));
 }
 
 export function getBBoxCenter(bbox: NonNullable<ModelElement["boundingBox"]>) {
