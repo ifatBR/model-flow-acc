@@ -127,9 +127,11 @@ export async function uploadFile(fileBuffer: Buffer, fileName: string) {
     throw new Error(`Failed to get signed upload URL: ${getRes.status} ${body}`);
   }
 
-  const { uploadKey, urls }: { uploadKey: string; urls: string[] } = await getRes.json().catch(() => {
-    throw new Error('Invalid JSON in signed upload URL response');
-  });
+  const { uploadKey, urls }: { uploadKey: string; urls: string[] } = await getRes
+    .json()
+    .catch(() => {
+      throw new Error('Invalid JSON in signed upload URL response');
+    });
 
   let s3Res: Response;
   try {

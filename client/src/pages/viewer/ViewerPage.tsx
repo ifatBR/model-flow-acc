@@ -30,6 +30,11 @@ export function ViewerPage() {
     setUrn(urn);
   };
 
+  const onClearModelClicked = () => {
+    deleteModel(urn);
+    setUrn("");
+  };
+
   return urn ? (
     <ViewerModalProvider>
       <Box
@@ -45,7 +50,7 @@ export function ViewerPage() {
           w="300px"
           h="300px"
         >
-          <Button onClick={() => { deleteModel(urn); setUrn(""); }}>Clear model</Button>
+          <Button onClick={onClearModelClicked}>Clear model</Button>
         </Box>
         <ApsViewer urn={urn} setIsLoading={setIsLoading} />
       </Box>
